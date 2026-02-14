@@ -15,7 +15,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { NotificationBell } from '@/components/notifications/notification-bell'
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface HeaderProps {
   profile: User
@@ -66,37 +67,24 @@ export function DashboardHeader({ profile }: HeaderProps) {
           <img src="/logo.png" alt="" className="h-10 w-10" />
           <span className="font-bold text-lg hidden sm:block">HostelMart</span>
         </div>
-        {showSearch && (
-          <form onSubmit={handleSearch} className="relative w-64 ml-6">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground ml" />
-            <Input
-              type="search"
-              placeholder="Search items..."
-              className="w-full pl-8 pr-20"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Button 
-              type="submit" 
-              size="sm" 
-              className="absolute right-1 top-1 h-7 px-2 text-xs"
-            >
-              Search
-            </Button>
-          </form>
-        )}
       </div>
       
       <div className="flex items-center gap-4">
-        <NotificationBell />
+<NotificationBell user={profile} />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8rounded-full">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                {profile.name?.[0]?.toUpperCase() || 'U'}
-              </div>
-            </Button>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 hover:cursor-pointer">
+      <Avatar className="h-8 w-8">
+        {profile.avatar_url ? (
+          <AvatarImage src={profile.avatar_url} alt={profile.name || 'User'} />
+        ) : (
+          <AvatarFallback className="bg-primary/10">
+            {profile.name?.[0]?.toUpperCase() || "U"}
+          </AvatarFallback>
+        )}
+      </Avatar>
+    </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
@@ -117,7 +105,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
               Request Item
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/dashboard/items')}>
-              Sell Item
+              Selling Item
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/dashboard/chat')}>
               My Chats

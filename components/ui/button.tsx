@@ -38,16 +38,25 @@ const buttonVariants = cva(
   }
 )
 
+interface ButtonProps extends React.ComponentProps<"button">,
+  VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+  fdprocessedid?: string
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
+}: ButtonProps) {
+  // Filter out client-side only attributes during SSR
+  const filteredProps = { ...props }
+  if (typeof window === 'undefined') {
+    delete filteredProps.fdprocessedid
+  }
+
   const Comp = asChild ? Slot : "button"
 
   return (
@@ -56,7 +65,8 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
+      suppressHydrationWarning={true}
+      {...filteredProps}
     />
   )
 }

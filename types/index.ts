@@ -1,4 +1,6 @@
-export type User = {
+import { User as SupabaseUser } from '@supabase/supabase-js';
+
+export type User = Omit<SupabaseUser, 'id' | 'email'> & {
   id: string
   email: string
   name: string

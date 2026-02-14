@@ -21,20 +21,22 @@ import { MapPin, MessageSquare, IndianRupee, Eye, Calendar, Trash2, Loader2 } fr
 import { formatPrice, formatDate } from '@/lib/utils'
 import { Item } from '@/types'
 import { useRouter } from 'next/navigation'
-import { NotificationService } from '@/lib/notifications'
- 
+import { notificationService } from '@/lib/notifications'
+import { DeleteItemDialog } from './delete-item-dialog'
+
 interface ItemCardProps {
   item: Item
   currentUser: {
     id: string
     hostel_type: 'boys' | 'girls'
   }
+  onDelete?: (itemId: string) => void
 }
- 
-export function ItemCard({ item, currentUser }: ItemCardProps) {
+
+export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
   const supabase = createClient()
   const router = useRouter()
-  const notificationService = new NotificationService()
+  // notificationService is now imported as a singleton
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
  
@@ -43,7 +45,7 @@ export function ItemCard({ item, currentUser }: ItemCardProps) {
       toast.error("You can only delete your own items")
       return
     }
- 
+
     setIsDeleting(true)
     
     try {
@@ -52,19 +54,26 @@ export function ItemCard({ item, currentUser }: ItemCardProps) {
         .from('chat_rooms')
         .delete()
         .eq('item_id', item.id)
- 
+
       if (chatError) throw chatError
- 
+
       // Delete the item
       const { error } = await supabase
         .from('items')
         .delete()
         .eq('id', item.id)
- 
+
       if (error) throw error
- 
+
       toast.success('Item deleted successfully')
-      router.refresh() // Refresh the page to update the UI
+      
+      // Call the onDelete callback to update parent component state
+      if (onDelete) {
+        onDelete(item.id)
+      } else {
+        // Fallback to router refresh if no callback provided
+        router.refresh()
+      }
     } catch (error) {
       console.error('Failed to delete item:', error)
       toast.error('Failed to delete item')
@@ -146,14 +155,14 @@ export function ItemCard({ item, currentUser }: ItemCardProps) {
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
-        <div className="relative h-48 w-full">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+        <div className="relative h-58 w-38 mx-auto">
           {item.images && item.images[0] ? (
             <Image
               src={item.images[0]}
               alt={item.title}
               fill
-              className="object-cover"
+              className="object-cover border rounded-sm"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
           ) : (
@@ -364,42 +373,12 @@ export function ItemCard({ item, currentUser }: ItemCardProps) {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Item</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this item? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsDeleteDialogOpen(false)}
-              disabled={isDeleting}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteItem}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteItemDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteItem}
+        itemName={item.title}
+      />
     </>
   )
 }

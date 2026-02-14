@@ -1,7 +1,7 @@
 // components/chat/chat-window.tsx
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import { Send, Check, CheckCheck, MapPin } from 'lucide-react'
 import { format } from 'date-fns'
 import { Message } from '@/types'
 import { toast } from 'sonner'
+import { notificationService } from '@/lib/notifications'
 
 interface ChatWindowProps {
   chatRoomId: string
@@ -56,38 +57,38 @@ export function ChatWindow({ chatRoomId, currentUserId }: ChatWindowProps) {
   }, [messages])
 
   const loadMessages = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          sender:profiles(name, avatar_url)
-        `)
-        .eq('chat_room_id', chatRoomId)
-        .order('created_at', { ascending: true })
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select(`
+        *,
+        sender:profiles(name, avatar_url)
+      `)
+      .eq('chat_room_id', chatRoomId)
+      .order('created_at', { ascending: true })
 
-      if (error) {
-        console.error('Error loading messages:', error)
-        toast.error('Failed to load messages')
-        return
-      }
-
-      if (data) {
-        setMessages(data as Message[])
-      }
-    } catch (error) {
-      console.error('Unexpected error loading messages:', error)
-      toast.error('An unexpected error occurred')
+    if (error) {
+      console.error('Error loading messages:', error)
+      toast.error('Failed to load messages')
+      return
     }
 
-    // Mark messages as read
-    await supabase
-      .from('messages')
-      .update({ read: true })
-      .eq('chat_room_id', chatRoomId)
-      .neq('sender_id', currentUserId)
-      .eq('read', false)
+    if (data) {
+      setMessages(data as Message[])
+    }
+  } catch (error) {
+    console.error('Unexpected error loading messages:', error)
+    toast.error('An unexpected error occurred')
   }
+
+  // Mark all messages as read
+  await supabase
+    .from('messages')
+    .update({ read: true })
+    .eq('chat_room_id', chatRoomId)
+    .neq('sender_id', currentUserId)
+    .eq('read', false)
+}
 
   const loadOtherUser = async () => {
     try {
@@ -118,62 +119,103 @@ export function ChatWindow({ chatRoomId, currentUserId }: ChatWindowProps) {
   }
 
   const subscribeToMessages = () => {
-    const channel = supabase
-      .channel(`chat:${chatRoomId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `chat_room_id=eq.${chatRoomId}`,
-        },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message])
-          // Mark as read if it's from other user
-          if (payload.new.sender_id !== currentUserId) {
-            supabase
-              .from('messages')
-              .update({ read: true })
-              .eq('id', payload.new.id)
-          }
+  const channel = supabase
+    .channel(`chat:${chatRoomId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `chat_room_id=eq.${chatRoomId}`,
+      },
+      async (payload) => {
+        const newMessage = payload.new as Message
+        setMessages((prev) => [...prev, newMessage])
+        
+        // If this is a message from the other user, mark it as read
+        if (newMessage.sender_id !== currentUserId) {
+          await supabase
+            .from('messages')
+            .update({ read: true })
+            .eq('id', newMessage.id)
         }
-      )
-      .subscribe()
+      }
+    )
+    .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
+  return () => {
+    supabase.removeChannel(channel)
   }
+}
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return
+  if (!newMessage.trim()) return;
+  setIsSending(true);
+  
+  try {
+    // Get chat room details to find the other user
+    const { data: chatRoom, error: chatRoomError } = await supabase
+      .from('chat_rooms')
+      .select('buyer_id, seller_id')
+      .eq('id', chatRoomId)
+      .single();
 
-    setIsSending(true)
-    try {
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          chat_room_id: chatRoomId,
-          sender_id: currentUserId,
-          content: newMessage.trim(),
-        })
-
-      if (error) throw error
-
-      // Update last message time
-      await supabase
-        .from('chat_rooms')
-        .update({ last_message_at: new Date().toISOString() })
-        .eq('id', chatRoomId)
-
-      setNewMessage('')
-    } catch (error) {
-      console.error('Failed to send message:', error)
-    } finally {
-      setIsSending(false)
+    if (chatRoomError || !chatRoom) {
+      throw new Error(chatRoomError?.message || 'Chat room not found');
     }
+
+    const receiverId = chatRoom.buyer_id === currentUserId 
+      ? chatRoom.seller_id 
+      : chatRoom.buyer_id;
+
+    // Debug log
+    console.log('Sending message to receiver:', receiverId);
+
+    // Send the message
+    const { error } = await supabase
+      .from('messages')
+      .insert({
+        chat_room_id: chatRoomId,
+        sender_id: currentUserId,
+        content: newMessage.trim(),
+      });
+
+    if (error) throw error;
+
+    // Clear the input field immediately for better UX
+    setNewMessage('');
+
+    // Debug log before creating notification
+    console.log('Creating notification for message...');
+
+    // Create notification for the receiver
+    const notificationResult = await notificationService.createMessageNotification(
+      chatRoomId,
+      currentUserId,
+      receiverId,
+      newMessage.trim()
+    );
+
+    // Debug log the notification result
+    console.log('Notification creation result:', notificationResult);
+
+    // Reload messages to ensure we have the latest data
+    await loadMessages();
+    
+    // Update last message time
+    await supabase
+      .from('chat_rooms')
+      .update({ last_message_at: new Date().toISOString() })
+      .eq('id', chatRoomId);
+    setNewMessage('');
+  } catch (error) {
+    console.error('Failed to send message:', error);
+    toast.error('Failed to send message');
+  } finally {
+    setIsSending(false);
   }
+};
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

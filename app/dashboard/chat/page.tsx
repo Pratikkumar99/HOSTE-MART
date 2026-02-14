@@ -1,7 +1,7 @@
 // app/(dashboard)/chat/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { ChatList } from '@/components/chat/chat-list'
+import { ChatListFixed } from '@/components/chat/chat-list-fixed'
 import { MessageSquare } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 
@@ -23,7 +23,7 @@ export default async function ChatPage() {
 
       <div className="bg-white rounded-xl border">
         <div className="p-6">
-          <ChatList userId={user.id} />
+          <ChatListFixed userId={user.id} />
         </div>
       </div>
     </div>

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { MatchingService } from "@/lib/matching";
-import { NotificationService } from "@/lib/notifications";
+import { notificationService } from "@/lib/notifications";
 import {
   MapPin,
   MessageSquare,
@@ -40,7 +40,7 @@ interface RequestCardProps {
 
 export function RequestCard({ request, currentUser }: RequestCardProps) {
   const supabase = createClient();
-  const notificationService = new NotificationService();
+  // notificationService is now imported as a singleton
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -55,22 +55,35 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
     setIsDeleting(true);
     
     try {
+      console.log('🗑️ Starting request deletion:', request.id);
+      
       // Delete associated chat rooms first (if any)
+      console.log('Deleting chat rooms for request:', request.id);
       const { error: chatError } = await supabase
         .from('chat_rooms')
         .delete()
         .eq('request_id', request.id);
 
-      if (chatError) throw chatError;
+      if (chatError) {
+        console.error('Error deleting chat rooms:', chatError);
+        throw chatError;
+      } else {
+        console.log('Chat rooms deleted successfully');
+      }
 
       // Delete the request
+      console.log('📋 Deleting request:', request.id);
       const { error } = await supabase
         .from('requests')
         .delete()
         .eq('id', request.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting request:', error);
+        throw error;
+      }
 
+      console.log('Request deleted successfully');
       toast.success('Request deleted successfully');
       window.location.reload(); // Refresh the page to update the UI
     } catch (error) {
@@ -207,11 +220,12 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
       setIsStartingChat(false);
     }
   };
+  
 
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow h-full flex flex-col">
-        <CardContent className="p-6 flex-1">
+      <Card className="hover:shadow-lg transition-shadow h-full flex flex-col w-60">
+        <CardContent className="p-4 flex-1">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h3 className="font-semibold text-lg line-clamp-1">
@@ -235,12 +249,15 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
             </div>
             {request.requester && (
               <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src={request.requester.avatar_url}
-                  alt={request.requester.name}
-                />
-                <AvatarFallback>
-                  {request.requester.name.charAt(0)}
+                {request.requester.avatar_url ? (
+                  <AvatarImage
+                    src={request.requester.avatar_url}
+                    alt={request.requester.name || 'User'}
+                    className="object-cover"
+                  />
+                ) : null}
+                <AvatarFallback className="bg-gray-200">
+                  {request.requester.name ? request.requester.name.charAt(0).toUpperCase() : 'U'}
                 </AvatarFallback>
               </Avatar>
             )}

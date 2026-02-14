@@ -1,40 +1,50 @@
 // app/(dashboard)/profile/page.tsx
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { MapPin, Mail, Phone, Hash, Home, Calendar, Edit } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
-import { BackButton } from '@/components/ui/back-button'
- 
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  MapPin,
+  Mail,
+  Phone,
+  Hash,
+  Home,
+  Calendar,
+  Edit
+} from "lucide-react";
+import Link from "next/link";
+import { formatDate } from "@/lib/utils";
+import { BackButton } from "@/components/ui/back-button";
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
   // Fetch user's items
   const { data: items } = await supabase
-    .from('items')
-    .select('*')
-    .eq('seller_id', user.id)
-    .order('created_at', { ascending: false })
+    .from("items")
+    .select("*")
+    .eq("seller_id", user.id)
+    .order("created_at", { ascending: false });
 
   // Fetch user's requests
   const { data: requests } = await supabase
-    .from('requests')
-    .select('*')
-    .eq('requester_id', user.id)
-    .order('created_at', { ascending: false })
+    .from("requests")
+    .select("*")
+    .eq("requester_id", user.id)
+    .order("created_at", { ascending: false });
 
   return (
     <div className="space-y-6">
@@ -55,14 +65,14 @@ export default async function ProfilePage() {
                   {profile.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              
+
               <h2 className="text-xl font-bold">{profile.name}</h2>
               <p className="text-gray-600">{profile.email}</p>
-              
+
               <Badge className="mt-2 capitalize">
                 {profile.hostel_type} Hostel
               </Badge>
-              
+
               <div className="mt-6 space-y-3 w-full">
                 <div className="flex items-center gap-2 text-sm">
                   <Hash className="h-4 w-4 text-gray-400" />
@@ -70,7 +80,9 @@ export default async function ProfilePage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Home className="h-4 w-4 text-gray-400" />
-                  <span>{profile.hostel_name}, Room {profile.room_number}</span>
+                  <span>
+                    {profile.hostel_name}, Room {profile.room_number}
+                  </span>
                 </div>
                 {profile.phone_number && (
                   <div className="flex items-center gap-2 text-sm">
@@ -83,11 +95,12 @@ export default async function ProfilePage() {
                   <span>Joined {formatDate(profile.created_at)}</span>
                 </div>
               </div>
-              
-              <Button className="w-full mt-6 bg-primary hover:bg-primary/90" size="lg">
-                <Edit className="mr-2 h-4 w-4" />
+
+              <Link href="/dashboard/profile/edit">
+                <Button className="w-full mt-6 bg-primary hover:bg-primary/90" size="lg">
                 Edit Profile
               </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -99,16 +112,20 @@ export default async function ProfilePage() {
               <CardContent className="p-6">
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Items Listed</p>
-                  <p className="text-3xl font-bold mt-2">{items?.length || 0}</p>
+                  <p className="text-3xl font-bold mt-2">
+                    {items?.length || 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Items Requested</p>
-                  <p className="text-3xl font-bold mt-2">{requests?.length || 0}</p>
+                  <p className="text-3xl font-bold mt-2">
+                    {requests?.length || 0}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -123,23 +140,34 @@ export default async function ProfilePage() {
               {items && items.length > 0 ? (
                 <div className="space-y-3">
                   {items.slice(0, 5).map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div>
                         <p className="font-medium">{item.title}</p>
-                        <p className="text-sm text-gray-600">₹{item.price} • {item.status}</p>
+                        <p className="text-sm text-gray-600">
+                          ₹{item.price} • {item.status}
+                        </p>
                       </div>
-                      <Badge className={
-                        item.status === 'available' ? 'bg-green-100 text-green-800' :
-                        item.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }>
+                      <Badge
+                        className={
+                          item.status === "available"
+                            ? "bg-green-100 text-green-800"
+                            : item.status === "reserved"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-gray-100 text-gray-800"
+                        }
+                      >
                         {item.status}
                       </Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-4">No items listed yet</p>
+                <p className="text-gray-500 text-center py-4">
+                  No items listed yet
+                </p>
               )}
             </CardContent>
           </Card>
@@ -153,28 +181,39 @@ export default async function ProfilePage() {
               {requests && requests.length > 0 ? (
                 <div className="space-y-3">
                   {requests.slice(0, 5).map((request) => (
-                    <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={request.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div>
                         <p className="font-medium">{request.title}</p>
-                        <p className="text-sm text-gray-600">{request.category} • {request.urgency}</p>
+                        <p className="text-sm text-gray-600">
+                          {request.category} • {request.urgency}
+                        </p>
                       </div>
-                      <Badge className={
-                        request.status === 'open' ? 'bg-green-100 text-green-800' :
-                        request.status === 'fulfilled' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }>
+                      <Badge
+                        className={
+                          request.status === "open"
+                            ? "bg-green-100 text-green-800"
+                            : request.status === "fulfilled"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                        }
+                      >
                         {request.status}
                       </Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-4">No requests made yet</p>
+                <p className="text-gray-500 text-center py-4">
+                  No requests made yet
+                </p>
               )}
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }

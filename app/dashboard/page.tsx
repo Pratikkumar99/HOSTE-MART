@@ -13,13 +13,44 @@ import { RequestCard } from "@/components/requests/request-card";
 import { Item, Request } from "@/types";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const supabase = createClient();
   const [items, setItems] = useState<Item[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; hostel_type: 'boys' | 'girls' } | null>(null);
-  const router = useRouter();
-  const supabase = createClient();
+  const [recentRequests, setRecentRequests] = useState<Request[]>([]);
+
+  useEffect(() => {
+    const loadRecentRequests = async () => {
+      if (!currentUser) return;
+      
+      const { data: requests, error } = await supabase
+        .from('requests')
+        .select(`
+          *,
+          requester:profiles!requester_id (
+            id,
+            name,
+            avatar_url,
+            hostel_name,
+            room_number
+          )
+        `)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(5); // Show only 5 recent requests
+
+      if (error) {
+        console.error('Error fetching recent requests:', error);
+      } else {
+        setRecentRequests(requests || []);
+      }
+    };
+
+    loadRecentRequests();
+  }, [currentUser, supabase]);
 
   useEffect(() => {
     let isMounted = true;
@@ -57,7 +88,7 @@ export default function DashboardPage() {
           .from("items")
           .select(`
             *,
-            seller:profiles(name, room_number, hostel_name)
+            seller:profiles(name, room_number, hostel_name, avatar_url)
           `)
           .eq("status", "available");
 
@@ -82,7 +113,7 @@ export default function DashboardPage() {
           .from('requests')
           .select(`
             *,
-            requester:profiles(name, room_number, hostel_name)
+            requester:profiles(name, room_number, hostel_name, avatar_url)
           `)
           .eq('status', 'open')
           .order('created_at', { ascending: false });
@@ -150,7 +181,7 @@ export default function DashboardPage() {
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">Buy & Sell Items</h1>
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 w-1/2  md:w-auto">
           <Button asChild className="w-full md:w-auto">
             <Link href="/dashboard/items/new" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
