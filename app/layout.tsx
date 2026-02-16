@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'HostelMart',
   description: 'Connect with your hostel community',
   icons: {
-    icon: '/logo.png',
+    icon: '/fav.jpeg',
   }
 }
 

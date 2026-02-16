@@ -58,7 +58,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="hidden lg:flex"
+                className="hidden lg:flex cursor-pointer"
                 onClick={() => router.push('/dashboard/items/new')}
               >
                 <Package className="mr-2 h-4 w-4" />
@@ -67,7 +67,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="hidden lg:flex"
+                className="hidden lg:flex cursor-pointer"
                 onClick={() => router.push('/dashboard/requests/new')}
               >
                 <ShoppingCart className="mr-2 h-4 w-4" />
@@ -76,7 +76,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
             </div>
 
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative cursor-pointer">
               <Bell className="h-5 w-5" />
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white" />
             </Button>
@@ -141,7 +141,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="flex-1"
+            className="flex-1 cursor-pointer"
             onClick={() => router.push('/dashboard/items/new')}
           >
             <Package className="mr-2 h-4 w-4" />
@@ -150,7 +150,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="flex-1"
+            className="flex-1 cursor-pointer"
             onClick={() => router.push('/dashboard/requests/new')}
           >
             <ShoppingCart className="mr-2 h-4 w-4" />
@@ -159,7 +159,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="flex-1"
+            className="flex-1 cursor-pointer"
             onClick={() => router.push('/dashboard/chat')}
           >
             <MessageSquare className="mr-2 h-4 w-4" />

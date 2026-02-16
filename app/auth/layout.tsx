@@ -1,33 +1,54 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { AnimatedSentence } from "@/components/auth/animated-sentence";
+'use client';
 
-export default async function AuthLayout({
+import { useRouter } from 'next/navigation';
+import { createClient } from "@/lib/supabase/client";
+import { AnimatedSentence } from "@/components/auth/animated-sentence";
+import { useEffect, useState } from 'react';
+
+export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (user) {
-    redirect("/dashboard");
+    checkUser();
+  }, [router, supabase]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
       <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
-
-      <div className="w-full max-w-md">
+      <div className="absolute top-0">
+        <img src="/logo.png" alt="DormAce" className="h-30 w-auto mx-auto" />
+      </div>
+      <div className="w-full max-w-md mt-30">
         <div className="mb-8 text-center">
           <h1>
-              <strong className="text-3xl">DormAce</strong> 
-                <br />
-                <br />
-                <AnimatedSentence text="           Making hostel buying and selling smartly"  />
+            <AnimatedSentence text="           Making hostel buying and selling smartly" />
           </h1>
         </div>
 

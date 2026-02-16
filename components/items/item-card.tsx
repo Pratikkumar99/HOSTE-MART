@@ -218,7 +218,7 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
+              className="flex-1 cursor-pointer"
               onClick={() => setIsDialogOpen(true)}
             >
               <Eye className="h-4 w-4 mr-2" />
@@ -229,7 +229,7 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
               <Button
                 variant="destructive"
                 size="sm"
-                className="flex-1"
+                className="flex-1 cursor-pointer"
                 onClick={() => setIsDeleteDialogOpen(true)}
                 disabled={isDeleting}
               >
@@ -243,7 +243,7 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
               <Button
                 variant="default"
                 size="sm"
-                className="flex-1 gap-2"
+                className="flex-1 gap-2 cursor-pointer"
                 onClick={handleStartChat}
                 disabled={isStartingChat || item.status !== 'available'}
               >

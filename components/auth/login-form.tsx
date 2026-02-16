@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,6 +50,7 @@ export function LoginForm() {
           id="email"
           type="email"
           value={email}
+          placeholder='xyz@gmail.com'
           onChange={(e) => setEmail(e.target.value)}
           required
         />
@@ -61,7 +63,16 @@ export function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          placeholder='Enter password'
         />
+        <div className="text-right">
+          <Link 
+            href="/forgot-password" 
+            className="text-sm text-primary hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Signing in...' : 'Sign In'}

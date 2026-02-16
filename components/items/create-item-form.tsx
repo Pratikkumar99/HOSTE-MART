@@ -141,7 +141,8 @@ export function CreateItemForm({ userId, hostelType }: CreateItemFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="p-8 max-w-2xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <Label htmlFor="title">Item Title *</Label>
         <Input
@@ -283,5 +284,7 @@ export function CreateItemForm({ userId, hostelType }: CreateItemFormProps) {
         </Button>
       </div>
     </form>
+
+    </div>
   )
 }

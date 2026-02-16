@@ -55,7 +55,7 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
     setIsDeleting(true);
     
     try {
-      console.log('🗑️ Starting request deletion:', request.id);
+      console.log(' Starting request deletion:', request.id);
       
       // Delete associated chat rooms first (if any)
       console.log('Deleting chat rooms for request:', request.id);
@@ -72,7 +72,7 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
       }
 
       // Delete the request
-      console.log('📋 Deleting request:', request.id);
+      console.log('Deleting request:', request.id);
       const { error } = await supabase
         .from('requests')
         .delete()
@@ -224,7 +224,7 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
 
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow h-full flex flex-col w-60">
+      <Card className="hover:shadow-lg transition-shadow h-full flex flex-col w-full">
         <CardContent className="p-4 flex-1">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
@@ -282,7 +282,7 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
         <CardFooter className="p-6 pt-0 flex gap-2">
           <Button
             variant="outline"
-            className="flex-1"
+            className="flex-1 cursor-pointer"
             onClick={() => setIsDialogOpen(true)}
           >
             View Details
@@ -292,7 +292,7 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
             <Button
               variant="destructive"
               size="sm"
-              className="flex-1"
+              className="flex-1 cursor-pointer"
               onClick={() => setIsDeleteDialogOpen(true)}
               disabled={isDeleting}
             >
@@ -306,7 +306,7 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
             <Button
               onClick={handleStartChat}
               disabled={isStartingChat || request.requester_id === currentUser.id}
-              className="flex-1 gap-2"
+              className="flex-1 gap-2 cursor-pointer"
             >
               <MessageSquare className="h-4 w-4" />
               {isStartingChat ? (

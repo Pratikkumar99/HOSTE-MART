@@ -19,16 +19,20 @@ export default function DashboardPage() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<{ id: string; hostel_type: 'boys' | 'girls' } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    hostel_type: "boys" | "girls";
+  } | null>(null);
   const [recentRequests, setRecentRequests] = useState<Request[]>([]);
 
   useEffect(() => {
     const loadRecentRequests = async () => {
       if (!currentUser) return;
-      
+
       const { data: requests, error } = await supabase
-        .from('requests')
-        .select(`
+        .from("requests")
+        .select(
+          `
           *,
           requester:profiles!requester_id (
             id,
@@ -37,13 +41,14 @@ export default function DashboardPage() {
             hostel_name,
             room_number
           )
-        `)
-        .eq('status', 'open')
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
         .limit(5); // Show only 5 recent requests
 
       if (error) {
-        console.error('Error fetching recent requests:', error);
+        console.error("Error fetching recent requests:", error);
       } else {
         setRecentRequests(requests || []);
       }
@@ -57,8 +62,11 @@ export default function DashboardPage() {
 
     async function loadDashboard() {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
         if (sessionError) throw sessionError;
         if (!session) {
           if (isMounted) {
@@ -75,7 +83,7 @@ export default function DashboardPage() {
           .single();
 
         if (profileError) throw profileError;
-        
+
         if (!profile) {
           if (isMounted) {
             router.push("/setup-profile");
@@ -86,16 +94,18 @@ export default function DashboardPage() {
         // Build the base query
         let query = supabase
           .from("items")
-          .select(`
+          .select(
+            `
             *,
             seller:profiles(name, room_number, hostel_name, avatar_url)
-          `)
+          `,
+          )
           .eq("status", "available");
 
         // Apply hostel type filter if available
         if (profile.hostel_type) {
           query = query.or(
-            `hostel_visible_to.eq.both,hostel_visible_to.eq.${profile.hostel_type}`
+            `hostel_visible_to.eq.both,hostel_visible_to.eq.${profile.hostel_type}`,
           );
         } else {
           query = query.eq("hostel_visible_to", "both");
@@ -110,22 +120,24 @@ export default function DashboardPage() {
 
         // Fetch requests
         const { data: requests, error: requestsError } = await supabase
-          .from('requests')
-          .select(`
+          .from("requests")
+          .select(
+            `
             *,
             requester:profiles(name, room_number, hostel_name, avatar_url)
-          `)
-          .eq('status', 'open')
-          .order('created_at', { ascending: false });
+          `,
+          )
+          .eq("status", "open")
+          .order("created_at", { ascending: false });
 
         if (requestsError) throw requestsError;
-        
+
         if (isMounted) {
           setItems(items || []);
           setRequests(requests || []);
           setCurrentUser({
             id: session.user.id,
-            hostel_type: profile.hostel_type as 'boys' | 'girls'
+            hostel_type: profile.hostel_type as "boys" | "girls",
           });
         }
       } catch (err) {
@@ -160,8 +172,8 @@ export default function DashboardPage() {
     return (
       <div className="p-8 text-center">
         <div className="text-red-600 mb-4">{error}</div>
-        <Button 
-          onClick={() => window.location.reload()} 
+        <Button
+          onClick={() => window.location.reload()}
           className="bg-primary hover:bg-primary/90"
         >
           Retry
@@ -173,27 +185,52 @@ export default function DashboardPage() {
   // Sort requests by urgency (high to low)
   const sortedRequests = [...requests].sort((a, b) => {
     const urgencyOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
-    return (urgencyOrder[b.urgency as keyof typeof urgencyOrder] || 0) - (urgencyOrder[a.urgency as keyof typeof urgencyOrder] || 0);
+    return (
+      (urgencyOrder[b.urgency as keyof typeof urgencyOrder] || 0) -
+      (urgencyOrder[a.urgency as keyof typeof urgencyOrder] || 0)
+    );
   });
 
   return (
-    <div className="space-y-8 md:p-8 max-w-8xl mx-auto">
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Buy & Sell Items</h1>
-        <div className="flex flex-col sm:flex-row gap-3 w-1/2  md:w-auto">
-          <Button asChild className="w-full md:w-auto">
-            <Link href="/dashboard/items/new" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Sell Item
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full md:w-auto">
-            <Link href="/dashboard/requests/new" className="flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Make Request
-            </Link>
-          </Button>
+    <div className="space-y-8 md:p-8 mx-auto max-w-7/1 px-4 sm:px-6 lg:px-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-black/2 via-black/10 to-transparent p-8">
+        <div className="absolute inset-0 bg-grid-white/5"></div>
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-black-900 to-black-700 bg-clip-text text-black">
+              Buy & Sell Items
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Discover amazing deals from your hostel community
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <Button
+              asChild
+              className="group relative overflow-hidden bg-gradient-to-r from-white to-white hover:from-black hover:to-black text-black hover:text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Link
+                href="/dashboard/items/new"
+                className="flex items-center gap-2 px-6"
+              >
+                <Package className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                Sell Item
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="group  bg-gradient-to-r from-black to-black hover:from-white hover:to-white text-white hover:text-black border-0 backdrop-blur-sm hover:bg-black/50"
+            >
+              <Link
+                href="/dashboard/requests/new"
+                className="flex items-center gap-2 px-6"
+              >
+                <ShoppingCart className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                Make Request
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
       {/* Requested Items Section */}
@@ -202,9 +239,9 @@ export default function DashboardPage() {
         {sortedRequests.length > 0 && currentUser ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sortedRequests.map((request) => (
-              <RequestCard 
-                key={request.id} 
-                request={request} 
+              <RequestCard
+                key={request.id}
+                request={request}
                 currentUser={currentUser}
               />
             ))}
@@ -212,20 +249,18 @@ export default function DashboardPage() {
         ) : (
           <div className="text-center py-8 border-2 border-dashed rounded-lg">
             <Package className="h-10 w-10 mx-auto text-gray-300" />
-            <p className="mt-2 text-gray-500">No active requests at the moment</p>
+            <p className="mt-2 text-gray-500">
+              No active requests at the moment
+            </p>
           </div>
         )}
       </div>
 
       <h2 className="text-xl font-bold">Available Items</h2>
       {items.length > 0 && currentUser ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {items.map((item) => (
-            <ItemCard 
-              key={item.id} 
-              item={item} 
-              currentUser={currentUser}
-            />
+            <ItemCard key={item.id} item={item} currentUser={currentUser} />
           ))}
         </div>
       ) : (
@@ -235,11 +270,12 @@ export default function DashboardPage() {
             No items found
           </h3>
           <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            There are currently no items listed in your hostel. Be the first to list an item!
+            There are currently no items listed in your hostel. Be the first to
+            list an item!
           </p>
           <Button asChild>
-            <Link 
-              href="/dashboard/items/new" 
+            <Link
+              href="/dashboard/items/new"
               className="bg-primary hover:bg-primary/90"
             >
               <Package className="h-4 w-4 mr-2" />

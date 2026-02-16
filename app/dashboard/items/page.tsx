@@ -54,9 +54,11 @@ export default async function ItemsPage({
   const { data: items } = await query.order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-6">
+    <div>
+      <BackButton />
+      <div className="space-y-6 mx-auto max-w-7/1 px-4 sm:px-6 lg:px-8">
       <div>
-        <BackButton />
+        
         <h1 className="text-3xl font-bold">Marketplace</h1>
         <p className="text-gray-600 mt-2">Browse and list items for sale</p>
       </div>
@@ -68,6 +70,7 @@ export default async function ItemsPage({
           hostel_type: profile.hostel_type
         }}
       />
+    </div>
     </div>
   )
 }

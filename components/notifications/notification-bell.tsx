@@ -180,7 +180,7 @@ export function NotificationBell({ user }: NotificationBellProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="relative hover:bg-accent hover:text-accent-foreground"
+          className="relative hover:bg-accent hover:text-accent-foreground cursor-pointer"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />

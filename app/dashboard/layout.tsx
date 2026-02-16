@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 import { DashboardHeader } from '@/components/dashboard/header'
+import { Footer } from '@/components/dashboard/footer'
 
 
 
@@ -71,6 +72,10 @@ export default async function DashboardLayout({
           {children}
 
         </main>
+
+        <footer>
+          <Footer />
+        </footer>
 
       </div>
 
