@@ -12,10 +12,10 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+    } = supabase.auth.onAuthStateChange((event: { type: string }) => {
+      if (event.type === 'SIGNED_OUT') {
         router.replace('/login')
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      } else if (event.type === 'SIGNED_IN' || event.type === 'TOKEN_REFRESHED' || event.type === 'USER_UPDATED') {
         router.refresh()
       }
     })
