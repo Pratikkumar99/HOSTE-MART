@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface HeaderProps {
   profile: User;
@@ -27,17 +28,17 @@ export function DashboardHeader({ profile }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Close mobile menu when route changes
   useEffect(() => {
     const handleRouteChange = () => {
       setIsMobileMenuOpen(false);
     };
-    
+
     // Listen for route changes
-    window.addEventListener('popstate', handleRouteChange);
+    window.addEventListener("popstate", handleRouteChange);
     return () => {
-      window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener("popstate", handleRouteChange);
     };
   }, []);
 
@@ -74,22 +75,25 @@ export function DashboardHeader({ profile }: HeaderProps) {
   };
 
   return (
-    <header className="relative flex h-18 items-center justify-between border-b bg-background px-4">
+    <header className="relative flex h-18 items-center justify-between border-b bg-background px-4 dark:border-white/20 dark:border-b">
       <div className="flex items-center gap-4">
         <div
-          className="flex items-center gap-2 cursor-pointer"
+          className="flex items-center cursor-pointer"
           onClick={() => router.push("/dashboard")}
-          
         >
           {/* Mobile menu button */}
-      <button 
-        className="md:hidden p-2 -ml-2 mr-4"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label="Toggle menu"
-      >
-        {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
-          <img src="/logo.png" alt="" className="h-10 w-10" />
+          <button
+            className="md:hidden p-2 -ml-2 mr-4"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+          <img src="/logo.png" alt="" className="h-10 w-10 bg-white rounded-full p-1 dark:border-2 dark:border-black/10" />
         </div>
         <span className="font-bold text-lg hidden sm:block ml-2">
           <p
@@ -103,29 +107,30 @@ export function DashboardHeader({ profile }: HeaderProps) {
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex items-center gap-6">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="text-sm font-medium cursor-pointer"
-          onClick={() => router.push('/dashboard/items')}
+          onClick={() => router.push("/dashboard/items")}
         >
           Sell Items
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="text-sm font-medium cursor-pointer"
-          onClick={() => router.push('/dashboard/requests')}
+          onClick={() => router.push("/dashboard/requests")}
         >
           Requests
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="text-sm font-medium cursor-pointer"
-          onClick={() => router.push('/dashboard/chat')}
+          onClick={() => router.push("/dashboard/chat")}
         >
-          Messages
+          Chats
         </Button>
       </div>
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         <NotificationBell user={profile} />
 
         <DropdownMenu>
@@ -160,12 +165,16 @@ export function DashboardHeader({ profile }: HeaderProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push("/dashboard/profile")} className="cursor-pointer">
+            <DropdownMenuItem
+              onClick={() => router.push("/dashboard/profile")}
+              className="cursor-pointer"
+            >
               Profile
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => router.push("/dashboard/profile/change-password")}
-            className="cursor-pointer">
+              className="cursor-pointer"
+            >
               Change Password
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -183,36 +192,36 @@ export function DashboardHeader({ profile }: HeaderProps) {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-14 left-0 right-0 bg-background border-b shadow-lg z-50 w-fit">
           <nav className="flex flex-col p-4 space-y-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-start"
-              onClick={() => router.push('/dashboard/items')}
+              onClick={() => router.push("/dashboard/items")}
             >
               Sell Items
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-start"
-              onClick={() => router.push('/dashboard/requests')}
+              onClick={() => router.push("/dashboard/requests")}
             >
               Requests
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-start"
-              onClick={() => router.push('/dashboard/chat')}
+              onClick={() => router.push("/dashboard/chat")}
             >
-              Messages
+              Chats
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-start"
-              onClick={() => router.push('/dashboard/profile')}
+              onClick={() => router.push("/dashboard/profile")}
             >
               Profile
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               className="w-fit justify-start"
               onClick={handleLogout}
             >

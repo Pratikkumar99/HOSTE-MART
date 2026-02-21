@@ -22,7 +22,7 @@ export type Item = {
   price: number
   category: string
   condition: 'new' | 'like_new' | 'good' | 'fair'
-  status: 'available' | 'reserved' | 'sold'
+  status: 'available' | 'reserved'
   images: string[]
   hostel_visible_to: 'boys' | 'girls' | 'both'
   created_at: string

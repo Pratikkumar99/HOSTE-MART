@@ -33,14 +33,14 @@ export default async function ChatRoomPage({
       <div className="mb-6">
         <Link
           href="/dashboard/chat"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-400"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Chats
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl border h-full">
+      <div className="bg-white rounded-xl border h-full dark:bg-black/30">
         <ChatWindow chatRoomId={id} currentUserId={user.id} />
       </div>
     </div>

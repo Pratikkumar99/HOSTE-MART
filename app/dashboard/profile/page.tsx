@@ -62,7 +62,7 @@ export default async function ProfilePage() {
                 </Avatar>
 
                 <h2 className="text-xl font-bold">{profile.name}</h2>
-                <p className="text-gray-600">{profile.email}</p>
+                <p className="text-gray-600 dark:text-white/30">{profile.email}</p>
 
                 <Badge className="mt-2 capitalize">
                   {profile.hostel_type} Hostel
@@ -109,7 +109,7 @@ export default async function ProfilePage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <p className="text-sm text-gray-600">Items Listed</p>
+                    <p className="text-sm text-gray-600 dark:text-white">Items Listed</p>
                     <p className="text-3xl font-bold mt-2">
                       {items?.length || 0}
                     </p>
@@ -120,7 +120,7 @@ export default async function ProfilePage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <p className="text-sm text-gray-600">Items Requested</p>
+                    <p className="text-sm text-gray-600 dark:text-white">Items Requested</p>
                     <p className="text-3xl font-bold mt-2">
                       {requests?.length || 0}
                     </p>
@@ -144,7 +144,7 @@ export default async function ProfilePage() {
                       >
                         <div>
                           <p className="font-medium">{item.title}</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-600 dark:text-white/60">
                             ₹{item.price} • {item.status}
                           </p>
                         </div>
@@ -152,9 +152,7 @@ export default async function ProfilePage() {
                           className={
                             item.status === "available"
                               ? "bg-green-100 text-green-800"
-                              : item.status === "reserved"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
+                              : "bg-yellow-100 text-yellow-800"
                           }
                         >
                           {item.status}
@@ -185,7 +183,7 @@ export default async function ProfilePage() {
                       >
                         <div>
                           <p className="font-medium">{request.title}</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-600 dark:text-white/60">
                             {request.category} • {request.urgency}
                           </p>
                         </div>

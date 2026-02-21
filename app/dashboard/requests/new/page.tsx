@@ -29,7 +29,7 @@ export default async function NewRequestPage() {
         <p className="text-gray-600 mt-2">Ask hostel mates for something you need.</p>
       </div>
 
-      <div className="bg-white rounded-xl border p-6">
+      <div className="bg-white rounded-xl border p-6 dark:bg-black dark:border-white/30">
         <CreateRequestForm userId={user.id} hostelType={profile.hostel_type} />
       </div>
     </div>

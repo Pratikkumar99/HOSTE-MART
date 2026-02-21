@@ -181,7 +181,7 @@ export function ChatListFixed({ userId }: ChatListProps) {
       {chats.map((chat) => {
         const partner = getChatPartner(chat)
         return (
-          <div key={chat.id} className="flex items-center gap-3 p-4 rounded-lg hover:bg-gray-50 transition-colors group">
+          <div key={chat.id} className="flex items-center gap-3 p-4 rounded-lg dark:hover:bg-white/10 transition-colors group">
             <a
               href={`/dashboard/chat/${chat.id}`}
               className="flex items-center gap-3 flex-1"

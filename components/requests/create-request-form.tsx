@@ -63,7 +63,7 @@ export function CreateRequestForm({ userId, hostelType }: CreateRequestFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 dark:bg-black">
       <div className="space-y-4">
         <Label htmlFor="title">What do you need? *</Label>
         <Input
@@ -138,10 +138,11 @@ export function CreateRequestForm({ userId, hostelType }: CreateRequestFormProps
           variant="outline"
           onClick={() => router.back()}
           disabled={loading}
+          className='cursor-pointer'
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading} className='cursor-pointer'>
           {loading ? 'Posting Request...' : 'Post Request'}
         </Button>
       </div>

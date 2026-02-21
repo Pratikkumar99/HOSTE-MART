@@ -134,7 +134,7 @@ export function ChatList({ userId }: ChatListProps) {
         {chats.map((chat) => {
           const partner = getChatPartner(chat)
           return (
-            <div key={chat.id} className="flex items-center gap-3 p-4 rounded-lg hover:bg-gray-50 transition-colors group">
+            <div key={chat.id} className="flex items-center gap-3 p-4 rounded-lg transition-colors group">
               <a
                 href={`/dashboard/chat/${chat.id}`}
                 className="flex items-center gap-3 flex-1"
@@ -145,7 +145,7 @@ export function ChatList({ userId }: ChatListProps) {
                     {partner?.name?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0" >
                   <div className="flex items-center justify-between">
                     <p className="font-medium truncate">{partner?.name}</p>
                     <span className="text-xs text-gray-500">
@@ -165,7 +165,7 @@ export function ChatList({ userId }: ChatListProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity  "
                     onClick={(e) => e.preventDefault()}
                   >
                     <MoreHorizontal className="h-4 w-4" />

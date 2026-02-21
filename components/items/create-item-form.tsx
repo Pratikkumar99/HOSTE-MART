@@ -276,10 +276,11 @@ export function CreateItemForm({ userId, hostelType }: CreateItemFormProps) {
           variant="outline"
           onClick={() => router.back()}
           disabled={loading}
+          className='cursor-pointer'
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading} className='cursor-pointer'>
           {loading ? 'Listing Item...' : 'List Item'}
         </Button>
       </div>

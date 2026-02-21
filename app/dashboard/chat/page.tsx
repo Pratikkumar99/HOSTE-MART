@@ -24,7 +24,7 @@ export default async function ChatPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border">
+        <div className="bg-white rounded-xl border dark:bg-black dark:border dark:border-white/20">
           <div className="p-6">
             <ChatListFixed userId={user.id} />
           </div>

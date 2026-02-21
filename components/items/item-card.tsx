@@ -150,7 +150,6 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
   const statusColors = {
     available: 'bg-green-100 text-green-800',
     reserved: 'bg-yellow-100 text-yellow-800',
-    sold: 'bg-gray-100 text-gray-800',
   }
 
   return (
@@ -261,7 +260,7 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
 
       {/* Item Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl border dark:border-white/30">
           <DialogHeader>
             <DialogTitle>{item.title}</DialogTitle>
             <DialogDescription>
@@ -305,28 +304,28 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
             <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold mb-2">Description</h3>
-                <p className="text-gray-700">{item.description}</p>
+                <p className="text-gray-700 dark:text-white/50">{item.description}</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-600">Price</p>
-                  <p className="text-2xl font-bold flex items-center">
+                  <p className="text-sm text-gray-600 dark:text-white">Price</p>
+                  <p className="text-2xl font-bold flex items-center dark:text-white/50">
                     {formatPrice(item.price)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Condition</p>
+                  <p className="text-sm text-gray-600 dark:text-white">Condition</p>
                   <Badge className={conditionColors[item.condition as keyof typeof conditionColors]}>
                     {item.condition.replace('_', ' ')}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Category</p>
-                  <p className="font-medium">{item.category}</p>
+                  <p className="text-sm text-gray-600 dark:text-white">Category</p>
+                  <p className="font-medium dark:text-white/50">{item.category}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Status</p>
+                  <p className="text-sm text-gray-600 dark:text-white">Status</p>
                   <Badge className={statusColors[item.status as keyof typeof statusColors]}>
                     {item.status}
                   </Badge>
@@ -346,8 +345,8 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
                     <div>
                       <p className="font-medium">{item.seller.name}</p>
                       <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <MapPin className="h-3 w-3" />
-                        <span>{item.seller.hostel_name}, Room {item.seller.room_number}</span>
+                        <MapPin className="h-3 w-3 dark:text-white/50" />
+                        <span className='dark:text-white/50'>{item.seller.hostel_name}, Room {item.seller.room_number}</span>
                       </div>
                     </div>
                   </div>

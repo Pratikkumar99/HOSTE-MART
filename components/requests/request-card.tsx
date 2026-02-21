@@ -320,7 +320,7 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
       </Card>
       {/* Request Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl dark:border dark:border-white/30">
           <DialogHeader>
             <DialogTitle>{request.title}</DialogTitle>
             <DialogDescription>
@@ -347,18 +347,18 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
 
             <div>
               <h3 className="font-semibold mb-2">Description</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">
+              <p className="text-gray-700 whitespace-pre-wrap dark:text-white/50">
                 {request.description}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Category</p>
-                <p className="font-medium">{request.category}</p>
+                <p className="text-sm text-gray-600 dark:text-white">Category</p>
+                <p className="font-medium dark:text-white/50">{request.category}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Status</p>
+                <p className="text-sm text-gray-600 dark:text-white">Status</p>
                 <Badge
                   className={
                     request.status === "open"
@@ -389,8 +389,8 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
                   <div>
                     <p className="font-medium">{request.requester.name}</p>
                     <div className="flex items-center gap-1 text-sm text-gray-600">
-                      <MapPin className="h-3 w-3" />
-                      <span>
+                      <MapPin className="h-3 w-3 dark:text-white/50" />
+                      <span className="dark:text-white/50">
                         {request.requester.hostel_name}, Room{" "}
                         {request.requester.room_number}
                       </span>

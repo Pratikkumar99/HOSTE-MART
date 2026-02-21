@@ -193,14 +193,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 md:p-8 mx-auto max-w-7/1 px-4 sm:px-6 lg:px-8">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-black/2 via-black/10 to-transparent p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-black/2 via-black/10 to-transparent p-8 dark:bg-gradient-to-r dark:from-white/2 dark:via-white/10 dark:to-transparent">
         <div className="absolute inset-0 bg-grid-white/5"></div>
-        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-black-900 to-black-700 bg-clip-text text-black">
+            <h1 className="text-3xl md:text-4xl font-bold text-black bg-gradient-to-r from-black-900 to-black-700 bg-clip-text dark:text-white">
               Buy & Sell Items
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-black mt-2 dark:text-gray-400">
               Discover amazing deals from your hostel community
             </p>
           </div>
