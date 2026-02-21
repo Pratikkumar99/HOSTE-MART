@@ -8,7 +8,7 @@ export default function LoginPage() {
       <h2 className="text-2xl font-bold text-center mb-6">Welcome Back</h2>
       <LoginForm />
       <div className="mt-6 text-center text-sm">
-        <span className="text-gray-600">Don't have an account? </span>
+        <span className="text-gray-600 dark:text-white/60">Don't have an account? </span>
         <Link href="/register" className="text-primary font-semibold hover:underline">
           Sign up
         </Link>

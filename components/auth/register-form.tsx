@@ -171,7 +171,7 @@ export function RegisterForm() {
             {avatarPreview ? (
               <AvatarImage src={avatarPreview} alt="Profile" className="object-cover" />
             ) : (
-              <AvatarFallback className="bg-gray-100">
+              <AvatarFallback className="bg-gray-100 dark:bg-black">
                 <User className="h-8 w-8 text-gray-400" />
               </AvatarFallback>
             )}

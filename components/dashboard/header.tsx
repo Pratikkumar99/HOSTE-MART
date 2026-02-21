@@ -93,7 +93,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
               <Menu className="h-5 w-5" />
             )}
           </button>
-          <img src="/logo.png" alt="" className="h-10 w-10 bg-white rounded-full p-1 dark:border-2 dark:border-black/10" />
+          <img src="/logo.png" alt="" className="h-10 w-10 bg-white rounded-full dark:invert" />
         </div>
         <span className="font-bold text-lg hidden sm:block ml-2">
           <p
@@ -194,35 +194,35 @@ export function DashboardHeader({ profile }: HeaderProps) {
           <nav className="flex flex-col p-4 space-y-2">
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/items")}
             >
               Sell Items
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/requests")}
             >
               Requests
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/chat")}
             >
               Chats
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/profile")}
             >
               Profile
             </Button>
             <Button
               variant="destructive"
-              className="w-fit justify-start"
+              className="w-fit justify-start cursor-pointer"
               onClick={handleLogout}
             >
               Log out
