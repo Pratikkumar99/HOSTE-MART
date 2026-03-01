@@ -130,7 +130,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
         </Button>
       </div>
       <div className="flex items-center gap-4">
-        <ThemeToggle />
+        <ThemeToggle/>
         <NotificationBell user={profile} />
 
         <DropdownMenu>

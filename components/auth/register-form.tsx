@@ -23,6 +23,7 @@ export function RegisterForm() {
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [hostelType, setHostelType] = useState<'boys' | 'girls' | ''>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
  
   const handleAvatarClick = () => {
@@ -106,7 +107,7 @@ export function RegisterForm() {
             phone_number: phoneNumber,
             handler_type: 'student',
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || window.location.origin}/auth/callback`,
         },
       })
  
@@ -213,7 +214,7 @@ export function RegisterForm() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="hostelType">Hostel Type</Label>
-          <Select name="hostelType" required>
+          <Select name="hostelType" required value={hostelType} onValueChange={(value: 'boys' | 'girls') => setHostelType(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
@@ -225,7 +226,29 @@ export function RegisterForm() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="hostelName">Hostel Name</Label>
-          <Input id="hostelName" name="hostelName" placeholder="BH-3/GH-3" required />
+          <Select name="hostelName" required disabled={!hostelType}>
+            <SelectTrigger>
+              <SelectValue placeholder={hostelType ? "Select hostel" : "Select hostel type first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {hostelType === 'boys' && (
+                <>
+                  <SelectItem value="BH-1">Boys Hostel 1 (BH-1)</SelectItem>
+                  <SelectItem value="BH-2">Boys Hostel 2 (BH-2)</SelectItem>
+                  <SelectItem value="BH-3">Boys Hostel 3 (BH-3)</SelectItem>
+                  <SelectItem value="BH-4">Boys Hostel 4 (BH-4)</SelectItem>
+                </>
+              )}
+              {hostelType === 'girls' && (
+                <>
+                  <SelectItem value="GH-1">Girls Hostel 1 (GH-1)</SelectItem>
+                  <SelectItem value="GH-2">Girls Hostel 2 (GH-2)</SelectItem>
+                  <SelectItem value="GH-3">Girls Hostel 3 (GH-3)</SelectItem>
+                  <SelectItem value="GH-4">Girls Hostel 4 (GH-4)</SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

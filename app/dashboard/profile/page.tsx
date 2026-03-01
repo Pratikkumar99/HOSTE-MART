@@ -68,7 +68,7 @@ export default async function ProfilePage() {
                   {profile.hostel_type} Hostel
                 </Badge>
 
-                <div className="mt-6 space-y-3 w-full">
+                <div className="mt-6 space-y-3 w-full flex flex-col justify-center items-center">
                   <div className="flex items-center gap-2 text-sm">
                     <Hash className="h-4 w-4 text-gray-400" />
                     <span>Roll No: {profile.roll_number}</span>
@@ -93,7 +93,7 @@ export default async function ProfilePage() {
 
                 <Link href="/dashboard/profile/edit">
                   <Button
-                    className="w-full mt-6 bg-primary hover:bg-primary/90"
+                    className="w-full mt-6 bg-primary hover:bg-primary/90 cursor-pointer"
                     size="lg"
                   >
                     Edit Profile
