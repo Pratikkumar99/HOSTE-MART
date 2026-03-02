@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@/types";
-import { LogOut, Bell, Menu, X } from "lucide-react";
+import { LogOut, Bell, Menu, X, Store, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -124,6 +124,13 @@ export function DashboardHeader({ profile }: HeaderProps) {
         <Button
           variant="ghost"
           className="text-sm font-medium cursor-pointer"
+          onClick={() => router.push("/businesses")}
+        >
+          Businesses
+        </Button>
+        <Button
+          variant="ghost"
+          className="text-sm font-medium cursor-pointer"
           onClick={() => router.push("/dashboard/chat")}
         >
           Chats
@@ -169,7 +176,14 @@ export function DashboardHeader({ profile }: HeaderProps) {
               onClick={() => router.push("/dashboard/profile")}
               className="cursor-pointer"
             >
+
               Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => router.push("/business/dashboard")}
+              className="cursor-pointer"
+            >
+              My Business
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => router.push("/dashboard/profile/change-password")}
@@ -205,6 +219,20 @@ export function DashboardHeader({ profile }: HeaderProps) {
               onClick={() => router.push("/dashboard/requests")}
             >
               Requests
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start cursor-pointer"
+              onClick={() => router.push("/businesses")}
+            >
+              Businesses
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start cursor-pointer"
+              onClick={() => router.push("/business/dashboard")}
+            >
+              My Business
             </Button>
             <Button
               variant="ghost"

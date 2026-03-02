@@ -10,24 +10,45 @@ export type User = Omit<SupabaseUser, 'id' | 'email'> & {
   hostel_name: string
   phone_number?: string
   avatar_url?: string
+  business_id?: string | null
   created_at: string
   updated_at: string
+}
+
+export type Business = {
+  id: string
+  owner_id: string
+  name: string
+  description: string
+  category: string
+  phone_number: string
+  email: string
+  logo_url?: string
+  location: string
+  hostel_type: 'boys' | 'girls' | 'both'
+  is_verified: boolean
+  status: 'active' | 'inactive' | 'suspended'
+  created_at: string
+  updated_at: string
+  owner?: User
 }
 
 export type Item = {
   id: string
   seller_id: string
+  business_id?: string | null
   title: string
   description: string
   price: number
   category: string
   condition: 'new' | 'like_new' | 'good' | 'fair'
-  status: 'available' | 'reserved'
+  status: 'available' | 'reserved' | 'sold'
   images: string[]
   hostel_visible_to: 'boys' | 'girls' | 'both'
   created_at: string
   updated_at: string
   seller?: User
+  business?: Business
 }
 
 export type Request = {

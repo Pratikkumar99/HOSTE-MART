@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell, Search, Home, Package, ShoppingCart, LogOut, User, MessageSquare } from 'lucide-react'
+import { Bell, Search, Home, Package, ShoppingCart, LogOut, User, MessageSquare, Store } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -73,6 +73,15 @@ export function DashboardHeader({ profile }: HeaderProps) {
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Make Request
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden lg:flex cursor-pointer"
+                onClick={() => router.push('/business/dashboard')}
+              >
+                <Store className="mr-2 h-4 w-4" />
+                Business
+              </Button>
             </div>
 
             {/* Notifications */}
@@ -110,6 +119,10 @@ export function DashboardHeader({ profile }: HeaderProps) {
                 <DropdownMenuItem onClick={() => router.push('/dashboard/items')}>
                   <Package className="mr-2 h-4 w-4" />
                   My Items
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/business/dashboard')}>
+                  <Store className="mr-2 h-4 w-4" />
+                  My Business
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs text-gray-500">
@@ -155,6 +168,15 @@ export function DashboardHeader({ profile }: HeaderProps) {
           >
             <ShoppingCart className="mr-2 h-4 w-4" />
             Request
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1 cursor-pointer"
+            onClick={() => router.push('/business/dashboard')}
+          >
+            <Store className="mr-2 h-4 w-4" />
+            Business
           </Button>
           <Button
             variant="ghost"
