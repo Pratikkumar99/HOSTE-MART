@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Search, Store, MapPin, Phone, ArrowLeft } from "lucide-react"
+import { Search, Store, MapPin, Phone, ArrowLeft, Users } from "lucide-react"
 import Link from "next/link"
 import { Business } from "@/types"
 import Image from "next/image"
@@ -81,7 +81,7 @@ export default function BusinessesPage() {
             <h1 className="text-3xl font-bold">Browse Businesses</h1>
           </div>
           <Link href="/business/setup">
-            <Button>
+            <Button className="cursor-pointer">
               <Store className="w-4 h-4 mr-2" />
               Add Your Business
             </Button>
@@ -140,17 +140,11 @@ export default function BusinessesPage() {
                         {business.location}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Phone className="w-3 h-3" />
-                        {business.phone_number}
+                        <Users className="w-3 h-3" />
+                        {business.hostel_type === 'boys' ? 'Boys' : 'Girls'}
                       </span>
                     </div>
                     
-                    <div className="mt-4 pt-4 border-t">
-                      <span className="text-xs text-gray-500">
-                        Serves: {business.hostel_type === 'both' ? 'Both Hostels' : 
-                                business.hostel_type === 'boys' ? 'Boys Hostel' : 'Girls Hostel'}
-                      </span>
-                    </div>
                   </CardContent>
                 </Card>
               </Link>

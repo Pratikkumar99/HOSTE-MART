@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { DashboardHeader } from "@/components/dashboard/sidebar";
 import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +23,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Upload, ArrowLeft, Store } from "lucide-react";
+import { Upload, ArrowLeft, Store, Users, Phone, Mail } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -38,16 +37,21 @@ export default function BusinessSetupPage() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        const { data: profileData } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", data.user.id)
           .single();
-        if (data) setProfile(data);
+        if (profileData) {
+          setProfile(profileData);
+          // Automatically set hostel type based on user profile
+          setFormData((prev) => ({
+            ...prev,
+            hostel_type: profileData.hostel_type || "",
+          }));
+        }
       }
     };
     fetchProfile();
@@ -56,11 +60,8 @@ export default function BusinessSetupPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    category: "",
-    phone_number: "",
-    email: "",
-    location: "",
-    hostel_type: "both" as "boys" | "girls" | "both",
+    category: "Accessories", // Default to food
+    hostel_type: "", // Will be set based on user profile
   });
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +83,20 @@ export default function BusinessSetupPage() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+
+      // Ensure profile is loaded
+      if (!profile) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        if (profileData) {
+          setProfile(profileData);
+        } else {
+          throw new Error("Profile not found");
+        }
+      }
 
       let logo_url = null;
 
@@ -111,7 +126,9 @@ export default function BusinessSetupPage() {
         .insert({
           owner_id: user.id,
           ...formData,
+          location: `${profile?.hostel_name}, Room ${profile?.room_number}`, // Auto-generate from profile
           logo_url,
+          is_verified: false, // Auto-set to false
           status: "active",
         })
         .select()
@@ -141,48 +158,41 @@ export default function BusinessSetupPage() {
     <div className="flex min-h-screen">
       <div className="flex-1">
         <Link
-        href="/dashboard"
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6 my-4"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Dashboard
-      </Link>
-        <main className="p-6">
+          href="/dashboard"
+          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 mb-6 my-4 dark:hover:text-gray-100"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Dashboard
+        </Link>
+        <main className="p-6 w-fit mx-auto">
           <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <Store className="w-8 h-8 text-primary" />
-                <div>
-                  <CardTitle className="text-2xl">
-                    Set Up Your Business
-                  </CardTitle>
-                  <CardDescription>
-                    Create your business profile to start selling items
-                  </CardDescription>
-                </div>
+            <CardHeader className="text-center">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Store className="w-10 h-10 text-primary" />
+                <CardTitle className="text-2xl">Set Up Your Business</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Logo Upload */}
                 <div className="flex flex-col items-center">
-                  <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-4 border-2 border-dashed border-gray-300">
+                  <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden mb-3 border-2 border-dashed border-gray-300">
                     {logoPreview ? (
                       <Image
                         src={logoPreview}
                         alt="Logo preview"
-                        width={128}
-                        height={128}
+                        width={96}
+                        height={96}
                         className="object-cover"
                       />
                     ) : (
-                      <Store className="w-12 h-12 text-gray-400" />
+                      <Store className="w-8 h-8 text-gray-400" />
                     )}
                   </div>
                   <Label htmlFor="logo" className="cursor-pointer">
                     <div className="flex items-center gap-2 text-sm text-primary hover:underline">
                       <Upload className="w-4 h-4" />
-                      Upload Business Logo
+                      Add Logo (Optional)
                     </div>
                     <input
                       id="logo"
@@ -203,13 +213,13 @@ export default function BusinessSetupPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      placeholder="Your business name"
+                      placeholder="e.g., crochet earrings collection"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category *</Label>
+                    <Label htmlFor="category">What do you sell? *</Label>
                     <Select
                       value={formData.category}
                       onValueChange={(value) =>
@@ -221,10 +231,11 @@ export default function BusinessSetupPage() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="food">Food & Beverages</SelectItem>
-                        <SelectItem value="stationery">Stationery</SelectItem>
+                        <SelectItem value="Accessories">Accessories</SelectItem>
                         <SelectItem value="electronics">Electronics</SelectItem>
                         <SelectItem value="clothing">Clothing</SelectItem>
+                        <SelectItem value="food">Food & Beverages</SelectItem>
+                        <SelectItem value="stationery">Stationery</SelectItem>
                         <SelectItem value="services">Services</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
@@ -240,83 +251,58 @@ export default function BusinessSetupPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    placeholder="Describe your business..."
+                    placeholder="e.g., crochet earrings collection for daily wear"
                     required
-                    rows={4}
+                    rows={3}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number *</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone_number}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          phone_number: e.target.value,
-                        })
-                      }
-                      placeholder="Contact number"
-                      required
-                    />
+                    <Label>
+                      <Store className="w-4 h-4 inline mr-2" />
+                      Business Location
+                    </Label>
+                    <div className="px-3 py-2 bg-gray-100 rounded-md text-sm font-medium dark:bg-black dark:text-white w-fit">
+                      {profile?.hostel_name}, Room {profile?.room_number}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Your business location is automatically set from your profile
+                    </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Business Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      placeholder="business@email.com"
-                      required
-                    />
+                    <Label>
+                      <Users className="w-4 h-4 inline mr-2" />
+                      Your Hostel Type
+                    </Label>
+                    <div className="px-3 py-2 bg-gray-100 rounded-md text-sm font-medium dark:bg-black dark:text-white w-fit">
+                      {profile?.hostel_type === "boys"
+                        ? "Boys Hostel"
+                        : "Girls Hostel"}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Your business will only be visible to students in your
+                      hostel
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location *</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) =>
-                        setFormData({ ...formData, location: e.target.value })
-                      }
-                      placeholder="e.g., BH-1, Room 101"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="hostel_type">Serves *</Label>
-                    <Select
-                      value={formData.hostel_type}
-                      onValueChange={(value: "boys" | "girls" | "both") =>
-                        setFormData({ ...formData, hostel_type: value })
-                      }
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="boys">Boys Hostel Only</SelectItem>
-                        <SelectItem value="girls">Girls Hostel Only</SelectItem>
-                        <SelectItem value="both">Both Hostels</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="flex justify-center">
+                  <Button
+                    type="submit"
+                    className="w-full dark:bg-white dark:text-black"
+                    size="lg"
+                    disabled={loading}
+                  >
+                    {loading ? "Creating Business..." : "Create Business"}
+                  </Button>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating Business..." : "Create Business"}
-                </Button>
+                <p className="text-xs text-gray-500 text-center">
+                  Only required fields marked with * are needed to start. You
+                  can add more details later.
+                </p>
               </form>
             </CardContent>
           </Card>

@@ -41,10 +41,8 @@ export default function BusinessEditPage() {
     name: "",
     description: "",
     category: "",
-    phone_number: "",
-    email: "",
     location: "",
-    hostel_type: "both" as "boys" | "girls" | "both",
+    hostel_type: "boys" as "boys" | "girls",
   })
 
   useEffect(() => {
@@ -81,10 +79,8 @@ export default function BusinessEditPage() {
         name: business.name || "",
         description: business.description || "",
         category: business.category || "",
-        phone_number: business.phone_number || "",
-        email: business.email || "",
         location: business.location || "",
-        hostel_type: business.hostel_type || "both",
+        hostel_type: business.hostel_type || "boys",
       })
       if (business.logo_url) {
         setLogoPreview(business.logo_url)
@@ -169,7 +165,7 @@ export default function BusinessEditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 dark:bg-black">
+    <div className="min-h-screen bg-white py-8 dark:bg-black">
       <Link
         href="/dashboard"
         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6 my-4"
@@ -272,30 +268,6 @@ export default function BusinessEditPage() {
                 />
               </div>
 
-              {/* Phone Number */}
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone_number}
-                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  required
-                />
-              </div>
-
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Business Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-
               {/* Location */}
               <div className="space-y-2">
                 <Label htmlFor="location">Location *</Label>
@@ -303,35 +275,28 @@ export default function BusinessEditPage() {
                   id="location"
                   placeholder="e.g., BH-3, Room 205"
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  onChange={() => {}}
                   required
+                  disabled
                 />
               </div>
 
               {/* Hostel Type */}
               <div className="space-y-2">
-                <Label htmlFor="hostel_type">Serves *</Label>
-                <Select
-                  value={formData.hostel_type}
-                  onValueChange={(value: "boys" | "girls" | "both") => setFormData({ ...formData, hostel_type: value })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="boys">Boys Hostel Only</SelectItem>
-                    <SelectItem value="girls">Girls Hostel Only</SelectItem>
-                    <SelectItem value="both">Both Hostels</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Serves *</Label>
+                <div className="px-3 py-2 bg-gray-100 rounded-md text-sm font-medium dark:bg-black dark:text-white w-fit">
+                  {formData.hostel_type === 'boys' ? 'Boys Hostel' : 'Girls Hostel'}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Hostel type cannot be changed after setup
+                </p>
               </div>
 
               <div className="flex gap-3">
-                <Button type="button" variant="outline" className="flex-1" onClick={() => router.push('/business/dashboard')}>
+                <Button type="button" variant="outline" className="flex-1 cursor-pointer" onClick={() => router.push('/business/dashboard')}>
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1" disabled={loading}>
+                <Button type="submit" className="flex-1 cursor-pointer" disabled={loading}>
                   {loading ? "Updating..." : "Update Business"}
                 </Button>
               </div>

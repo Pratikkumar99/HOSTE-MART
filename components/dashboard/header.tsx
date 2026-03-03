@@ -83,7 +83,7 @@ export function DashboardHeader({ profile }: HeaderProps) {
         >
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 -ml-2 mr-4"
+            className="md:hidden p-2 -ml-2 mr-4 cursor-pointer"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >

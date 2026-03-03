@@ -21,11 +21,9 @@ export type Business = {
   name: string
   description: string
   category: string
-  phone_number: string
-  email: string
   logo_url?: string
   location: string
-  hostel_type: 'boys' | 'girls' | 'both'
+  hostel_type: 'boys' | 'girls'
   is_verified: boolean
   status: 'active' | 'inactive' | 'suspended'
   created_at: string

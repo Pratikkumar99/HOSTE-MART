@@ -94,7 +94,7 @@ export function CreateItemForm({ userId, hostelType }: CreateItemFormProps) {
     const price = parseFloat(formData.get('price') as string)
     const category = formData.get('category') as string
     const condition = formData.get('condition') as 'new' | 'like_new' | 'good' | 'fair'
-    const hostelVisibleTo = formData.get('hostelVisibleTo') as 'boys' | 'girls' | 'both'
+    const hostelVisibleTo = hostelType
 
     try {
       // First create the item
@@ -213,19 +213,13 @@ export function CreateItemForm({ userId, hostelType }: CreateItemFormProps) {
           </Select>
         </div>
 
-        <div className="space-y-4">
-          <Label htmlFor="hostelVisibleTo">Visible To *</Label>
-          <Select name="hostelVisibleTo" required defaultValue="both">
-            <SelectTrigger>
-              <SelectValue placeholder="Select visibility" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="both">Both Hostels</SelectItem>
-              <SelectItem value={hostelType}>
-                {hostelType === 'boys' ? 'Boys Hostel Only' : 'Girls Hostel Only'}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-4 dark:bg-black">
+          <Label>Visibility</Label>
+          <div className="p-3 bg-gray-50 rounded-lg border dark:bg-black">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Your item will be visible to: <span className="font-medium">{hostelType === 'boys' ? 'Boys Hostel' : 'Girls Hostel'}</span> only
+            </p>
+          </div>
         </div>
       </div>
 
@@ -233,7 +227,7 @@ export function CreateItemForm({ userId, hostelType }: CreateItemFormProps) {
         <Label>Images (Max 5)</Label>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {imagePreviews.map((preview, index) => (
-            <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
+            <div key={index} className="relative aspect-square rounded-lg overflow-hidden border dark:bg-black">
               <img
                 src={preview}
                 alt={`Preview ${index + 1}`}

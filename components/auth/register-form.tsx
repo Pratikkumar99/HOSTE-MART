@@ -15,21 +15,68 @@ import {
 } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
-import { Camera, User } from 'lucide-react'
+import { Camera, User, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
- 
+
 export function RegisterForm() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [hostelType, setHostelType] = useState<'boys' | 'girls' | ''>('')
+  const [email, setEmail] = useState('')
+  const [emailVerified, setEmailVerified] = useState(false)
+  const [verifyingEmail, setVerifyingEmail] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
- 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click()
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setEmail(value)
+    setEmailVerified(false)
+    setEmailError(null)
   }
- 
+
+  const verifyEmail = async () => {
+    if (!email) {
+      setEmailError('Please enter an email address')
+      return
+    }
+
+    setVerifyingEmail(true)
+    setEmailError(null)
+
+    try {
+      const response = await fetch('/api/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to verify email')
+      }
+
+      if (data.valid) {
+        setEmailVerified(true)
+        toast.success(data.message || 'Email verified successfully')
+      } else {
+        setEmailVerified(false)
+        setEmailError(data.message || 'Email verification failed')
+        toast.error(data.message || 'Email verification failed')
+      }
+    } catch (error) {
+      console.error('Email verification error:', error)
+      setEmailVerified(false)
+      setEmailError('Failed to verify email. Please try again.')
+      toast.error('Failed to verify email')
+    } finally {
+      setVerifyingEmail(false)
+    }
+  }
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -45,13 +92,13 @@ export function RegisterForm() {
       reader.readAsDataURL(file)
     }
   }
- 
+
   async function uploadAvatar(userId: string, file: File): Promise<string | null> {
     try {
       const fileExt = file.name.split('.').pop()
       const fileName = `${userId}-${Date.now()}.${fileExt}`
       const filePath = `avatars/${fileName}`
- 
+
       // Upload the file
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -60,25 +107,25 @@ export function RegisterForm() {
           upsert: false,
           contentType: file.type
         })
- 
+
       if (uploadError) throw uploadError
- 
+
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath)
- 
+
       return publicUrl
     } catch (error) {
       console.error('Error uploading avatar:', error)
       return null
     }
   }
- 
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
- 
+
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
     const password = formData.get('password') as string
@@ -89,7 +136,13 @@ export function RegisterForm() {
     const hostelName = formData.get('hostelName') as string
     const phoneNumber = formData.get('phoneNumber') as string
     const avatarFile = fileInputRef.current?.files?.[0]
-    
+
+    if (!emailVerified) {
+      toast.error('Please verify your email address before registering')
+      setLoading(false)
+      return
+    }
+
     try {
       // 1. First, create the user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -110,10 +163,19 @@ export function RegisterForm() {
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || window.location.origin}/auth/callback`,
         },
       })
- 
+
       if (authError) throw authError
       if (!authData.user) throw new Error('User creation failed')
- 
+
+      // Refresh session to ensure client is authenticated for storage operations
+      const { error: sessionError } = await supabase.auth.refreshSession()
+      if (sessionError) {
+        console.warn('Session refresh warning:', sessionError)
+      }
+
+      // Small delay to ensure session is established
+      await new Promise(resolve => setTimeout(resolve, 500))
+
       // 2. Create the profile first without avatar
       const { error: profileError } = await supabase
         .from('profiles')
@@ -128,30 +190,31 @@ export function RegisterForm() {
           phone_number: phoneNumber,
           updated_at: new Date().toISOString(),
         })
- 
+
       if (profileError) throw profileError
- 
+
       // 3. If avatar was uploaded, handle it after profile creation
       let avatarUrl: string | null = null
       if (avatarFile && authData.user) {
-        // Small delay to ensure session is established
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Upload avatar
+        // Upload avatar (non-blocking - don't fail registration if this fails)
         avatarUrl = await uploadAvatar(authData.user.id, avatarFile)
-        
+
         if (avatarUrl) {
           // Update profile with avatar URL
-          await supabase
+          const { error: avatarUpdateError } = await supabase
             .from('profiles')
             .update({ avatar_url: avatarUrl })
             .eq('id', authData.user.id)
+
+          if (avatarUpdateError) {
+            console.error('Failed to update profile with avatar:', avatarUpdateError)
+          }
         }
       }
- 
+
       toast.success('Registration successful! Please check your email to verify your account.')
       router.push('/login?registered=true')
- 
+
     } catch (error) {
       console.error('Registration error:', error)
       toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.')
@@ -159,7 +222,7 @@ export function RegisterForm() {
       setLoading(false)
     }
   }
- 
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Avatar Upload */}
@@ -167,7 +230,7 @@ export function RegisterForm() {
         <div className="relative">
           <Avatar 
             className="h-24 w-24 cursor-pointer border-2 border-dashed border-gray-300 hover:border-primary transition-colors"
-            onClick={handleAvatarClick}
+            onClick={() => fileInputRef.current?.click()}
           >
             {avatarPreview ? (
               <AvatarImage src={avatarPreview} alt="Profile" className="object-cover" />
@@ -203,7 +266,58 @@ export function RegisterForm() {
 
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" placeholder="student@university.edu" required />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Input 
+              id="email" 
+              name="email" 
+              type="email" 
+              placeholder="student@university.edu" 
+              required 
+              value={email}
+              onChange={handleEmailChange}
+              className={emailError ? 'border-red-500 pr-10' : emailVerified ? 'border-green-500 pr-10' : 'pr-10'}
+              disabled={emailVerified}
+            />
+            {emailVerified && (
+              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+            )}
+            {emailError && (
+              <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
+            )}
+          </div>
+          <Button
+            type="button"
+            onClick={verifyEmail}
+            disabled={verifyingEmail || emailVerified || !email}
+            variant={emailVerified ? "outline" : "secondary"}
+            className="whitespace-nowrap"
+          >
+            {verifyingEmail ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Verifying...
+              </>
+            ) : emailVerified ? (
+              <>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Verified
+              </>
+            ) : (
+              'Verify Email'
+            )}
+          </Button>
+        </div>
+        {emailError && (
+          <p className="text-sm text-red-500">{emailError}</p>
+        )}
+        {emailVerified && (
+          <p className="text-sm text-green-600 flex items-center gap-1">
+            <CheckCircle className="w-4 h-4" />
+            Email verified and ready for registration
+          </p>
+        )}
+        <p className="text-xs text-gray-500">Click "Verify Email" to confirm your email exists before registering</p>
       </div>
 
       <div className="space-y-2">
@@ -263,7 +377,7 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full" disabled={loading || !emailVerified}>
         {loading ? 'Creating account...' : 'Register'}
       </Button>
     </form>

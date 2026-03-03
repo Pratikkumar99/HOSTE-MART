@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
-import { Store, Package, Plus, TrendingUp, Users, ArrowLeft, Edit } from "lucide-react"
+import { Store, Package, Plus, TrendingUp, Users, ArrowLeft, Edit, Trash2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Business, Item } from "@/types"
@@ -37,13 +37,18 @@ export default function BusinessDashboardPage() {
         if (profileData) setProfile(profileData)
 
         // Fetch business
-        const { data: businessData, error: businessError } = await supabase
+        const { data: businessesData, error: businessError } = await supabase
           .from('businesses')
-          .select('*')
+          .select('id, owner_id, name, description, category, location, hostel_type, status, logo_url, is_verified, created_at, updated_at')
           .eq('owner_id', user.id)
-          .single()
+
+        const businessData = businessesData?.[0] // Take first business if multiple exist
+
+        console.log('Business lookup:', { businessData, businessError, userId: user.id })
+        console.log('Business error details:', businessError?.message, businessError?.details)
 
         if (businessError || !businessData) {
+          console.log('Redirecting to setup - no business found')
           router.push('/business/setup')
           return
         }
@@ -54,8 +59,10 @@ export default function BusinessDashboardPage() {
         const { data: itemsData } = await supabase
           .from('items')
           .select('*')
-          .eq('business_id', businessData.id)
+          .eq('business_id', businessData.id) // Use business_id since it exists
           .order('created_at', { ascending: false })
+
+        console.log('Items lookup:', { itemsData, businessId: businessData.id })
 
         setItems(itemsData || [])
       } catch (error) {
@@ -78,14 +85,58 @@ export default function BusinessDashboardPage() {
     return colors[status] || "bg-gray-100 text-gray-800"
   }
 
+  const handleDeleteItem = async (itemId: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Not authenticated")
+
+      // Get item to delete images
+      const { data: itemData } = await supabase
+        .from('items')
+        .select('images')
+        .eq('id', itemId)
+        .eq('seller_id', user.id)
+        .single()
+
+      // Delete images from storage
+      if (itemData?.images) {
+        for (const imageUrl of itemData.images) {
+          const fileName = imageUrl.split('/').pop()
+          if (fileName) {
+            await supabase.storage
+              .from('item-images')
+              .remove([fileName])
+          }
+        }
+      }
+
+      // Delete item
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', itemId)
+        .eq('seller_id', user.id)
+
+      if (error) throw error
+
+      toast.success("Item deleted successfully!")
+      setItems(items.filter(item => item.id !== itemId))
+    } catch (error) {
+      console.error("Error deleting item:", error)
+      toast.error("Failed to delete item")
+    }
+  }
+
   if (loading) return <div className="p-8">Loading...</div>
   if (!business) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-black">
       <Link
         href="/dashboard"
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6 my-4"
+        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6 my-4 dark:text-gray-400 dark:hover:text-gray-300"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Dashboard
@@ -115,7 +166,7 @@ export default function BusinessDashboardPage() {
                 </div>
               </div>
               <Link href="/business/edit">
-                <Button variant="outline">
+                <Button variant="outline" className="cursor-pointer">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>
@@ -125,7 +176,7 @@ export default function BusinessDashboardPage() {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -148,38 +199,27 @@ export default function BusinessDashboardPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <Users className="w-8 h-8 text-purple-500" />
-                <div>
-                  <p className="text-2xl font-bold">{items.filter(i => i.status === 'reserved').length}</p>
-                  <p className="text-sm text-gray-600">Reserved</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Tabs */}
         <Tabs defaultValue="items">
           <TabsList>
-            <TabsTrigger value="items">Items</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="items" className="cursor-pointer">Items</TabsTrigger>
+            <TabsTrigger value="settings" className="cursor-pointer">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="items" className="mt-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Your Items</h2>
               <Link href="/business/items/create">
-                <Button>
+                <Button className="cursor-pointer">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Item
                 </Button>
               </Link>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-[100%]">
               {items.map((item) => (
                 <Card key={item.id}>
                   <CardContent className="p-4">
@@ -193,10 +233,22 @@ export default function BusinessDashboardPage() {
                     <h3 className="font-semibold truncate">{item.title}</h3>
                     <p className="text-lg font-bold text-primary">Rs.{item.price}</p>
                     <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
-                    <div className="flex gap-2 mt-3">
+                    <div className="flex gap-2 mt-3 ">
                       <Link href={`/business/items/${item.id}/edit`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full">Edit</Button>
+                        <Button variant="outline" size="sm" className="w-full cursor-pointer">
+                          <Edit className="w-3 h-3 mr-1" />
+                          Edit
+                        </Button>
                       </Link>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="px-3 cursor-pointer"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Delete
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -212,20 +264,20 @@ export default function BusinessDashboardPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Phone</p>
-                    <p className="font-medium">{business.phone_number}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium">{business.email}</p>
-                  </div>
-                  <div>
                     <p className="text-sm text-gray-600">Location</p>
                     <p className="font-medium">{business.location}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Serves</p>
                     <p className="font-medium capitalize">{business.hostel_type} Hostel</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Category</p>
+                    <p className="font-medium capitalize">{business.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Status</p>
+                    <p className="font-medium capitalize">{business.status}</p>
                   </div>
                 </div>
               </CardContent>

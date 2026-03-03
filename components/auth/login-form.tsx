@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
+import { retryWithBackoff, getAuthErrorMessage } from '@/lib/utils/auth'
 
 const supabase = createClient()
 
@@ -28,7 +29,8 @@ export function LoginForm() {
       })
 
       if (error) {
-        toast.error(error.message)
+        const errorMessage = getAuthErrorMessage(error)
+        toast.error(errorMessage)
         return
       }
 
@@ -36,7 +38,8 @@ export function LoginForm() {
       window.location.href = '/dashboard'
     } catch (err) {
       console.error('Error during login:', err)
-      toast.error('An error occurred during login')
+      const errorMessage = getAuthErrorMessage(err)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }

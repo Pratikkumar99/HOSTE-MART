@@ -40,7 +40,6 @@ export default function CreateBusinessItemPage() {
     price: "",
     category: "",
     condition: "new" as "new" | "like_new" | "good" | "fair",
-    hostel_visible_to: "both" as "boys" | "girls" | "both",
   })
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,10 +82,10 @@ export default function CreateBusinessItemPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Not authenticated")
 
-      // Get user's business
+      // Get user's business and profile
       const { data: profile } = await supabase
         .from('profiles')
-        .select('business_id')
+        .select('business_id, hostel_type')
         .eq('id', user.id)
         .single()
 
@@ -95,7 +94,7 @@ export default function CreateBusinessItemPage() {
       const { error } = await supabase
         .from('items')
         .insert({
-          business_id: profile.business_id,
+          business_id: profile.business_id, // Use business_id since it exists
           seller_id: user.id,
           title: formData.title,
           description: formData.description,
@@ -103,7 +102,7 @@ export default function CreateBusinessItemPage() {
           category: formData.category,
           condition: formData.condition,
           images: images,
-          hostel_visible_to: formData.hostel_visible_to,
+          hostel_visible_to: profile.hostel_type, // Auto-set based on user's hostel type
           status: 'available',
         })
 
@@ -120,7 +119,7 @@ export default function CreateBusinessItemPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 dark:bg-black">
+    <div className="min-h-screen bg-white py-8 dark:bg-black">
       <Link
         href="/dashboard"
         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6 my-4"
@@ -215,27 +214,17 @@ export default function CreateBusinessItemPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="visibility">Visible To *</Label>
-                  <Select
-                    value={formData.hostel_visible_to}
-                    onValueChange={(value: "boys" | "girls" | "both") => setFormData({ ...formData, hostel_visible_to: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="boys">Boys Hostel</SelectItem>
-                      <SelectItem value="girls">Girls Hostel</SelectItem>
-                      <SelectItem value="both">Both</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-2">
+                <Label>Visible To *</Label>
+                <div className="px-3 py-2 bg-gray-100 rounded-md text-sm font-medium w-fit dark:bg-black dark:text-white">
+                  {profile?.hostel_type === 'boys' ? 'Boys Hostel' : 'Girls Hostel'}
                 </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Items are automatically visible to your hostel type only
+                </p>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
                 {loading ? "Adding Item..." : "Add Item"}
               </Button>
             </form>
