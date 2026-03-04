@@ -33,14 +33,21 @@ export default function BusinessesPage() {
 
   useEffect(() => {
     fetchBusinesses()
-  }, [])
+  }, [profile])
 
   const fetchBusinesses = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('businesses')
         .select('*')
         .eq('status', 'active')
+
+      // Filter by hostel type if user profile is available
+      if (profile && profile.hostel_type) {
+        query = query.eq('hostel_type', profile.hostel_type)
+      }
+
+      const { data, error } = await query
         .order('created_at', { ascending: false })
 
       if (error) throw error

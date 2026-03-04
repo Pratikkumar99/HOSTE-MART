@@ -61,7 +61,7 @@ export function RegisterForm() {
 
       if (data.valid) {
         setEmailVerified(true)
-        toast.success(data.message || 'Email verified successfully')
+        toast.success('Email verified successfully')
       } else {
         setEmailVerified(false)
         setEmailError(data.message || 'Email verification failed')
@@ -127,7 +127,7 @@ export function RegisterForm() {
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
+    const userEmail = formData.get('email') as string
     const password = formData.get('password') as string
     const name = formData.get('name') as string
     const rollNumber = formData.get('rollNumber') as string
@@ -137,16 +137,10 @@ export function RegisterForm() {
     const phoneNumber = formData.get('phoneNumber') as string
     const avatarFile = fileInputRef.current?.files?.[0]
 
-    if (!emailVerified) {
-      toast.error('Please verify your email address before registering')
-      setLoading(false)
-      return
-    }
-
     try {
       // 1. First, create the user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
+        email: userEmail,
         password,
         options: {
           data: {
@@ -157,8 +151,8 @@ export function RegisterForm() {
             hostel_type: hostelType,
             hostel_name: hostelName,
             room_number: roomNumber,
-            phone_number: phoneNumber,
             handler_type: 'student',
+            is_anonymous: false,
           },
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || window.location.origin}/auth/callback`,
         },
@@ -175,23 +169,6 @@ export function RegisterForm() {
 
       // Small delay to ensure session is established
       await new Promise(resolve => setTimeout(resolve, 500))
-
-      // 2. Create the profile first without avatar
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: authData.user.id,
-          email,
-          name,
-          roll_number: rollNumber,
-          room_number: roomNumber,
-          hostel_type: hostelType,
-          hostel_name: hostelName,
-          phone_number: phoneNumber,
-          updated_at: new Date().toISOString(),
-        })
-
-      if (profileError) throw profileError
 
       // 3. If avatar was uploaded, handle it after profile creation
       let avatarUrl: string | null = null
@@ -211,8 +188,6 @@ export function RegisterForm() {
           }
         }
       }
-
-      toast.success('Registration successful! Please check your email to verify your account.')
       router.push('/login?registered=true')
 
     } catch (error) {
@@ -239,8 +214,6 @@ export function RegisterForm() {
                 <User className="h-8 w-8 text-gray-400" />
               </AvatarFallback>
             )}
-            <div className="absolute bottom-0 right-0 bg-primary p-2 rounded-full">
-            </div>
           </Avatar>
           <input
             type="file"
@@ -253,6 +226,51 @@ export function RegisterForm() {
         <p className="mt-2 text-sm text-gray-500">Click to upload a profile picture (optional)</p>
       </div>
 
+      {/* Email Input with Verification */}
+      <div className="space-y-2">
+        <Label htmlFor="email">Email Address</Label>
+        <div className="flex gap-2">
+          <Input 
+            id="email" 
+            name="email" 
+            type="email" 
+            placeholder="john@example.com" 
+            value={email}
+            onChange={handleEmailChange}
+            required 
+          />
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={verifyEmail}
+            disabled={!email || verifyingEmail}
+            className="whitespace-nowrap"
+          >
+            {verifyingEmail ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              <>
+                {emailVerified ? (
+                  <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                ) : (
+                  <XCircle className="mr-2 h-4 w-4" />
+                )}
+                Verify
+              </>
+            )}
+          </Button>
+        </div>
+        {emailError && (
+          <p className="text-sm text-red-600">{emailError}</p>
+        )}
+        {emailVerified && (
+          <p className="text-sm text-green-600">Email verified successfully</p>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Full Name</Label>
@@ -262,67 +280,6 @@ export function RegisterForm() {
           <Label htmlFor="rollNumber">Roll Number</Label>
           <Input id="rollNumber" name="rollNumber" placeholder="2023CS101" required />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Input 
-              id="email" 
-              name="email" 
-              type="email" 
-              placeholder="student@university.edu" 
-              required 
-              value={email}
-              onChange={handleEmailChange}
-              className={emailError ? 'border-red-500 pr-10' : emailVerified ? 'border-green-500 pr-10' : 'pr-10'}
-              disabled={emailVerified}
-            />
-            {emailVerified && (
-              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-            )}
-            {emailError && (
-              <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
-            )}
-          </div>
-          <Button
-            type="button"
-            onClick={verifyEmail}
-            disabled={verifyingEmail || emailVerified || !email}
-            variant={emailVerified ? "outline" : "secondary"}
-            className="whitespace-nowrap"
-          >
-            {verifyingEmail ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Verifying...
-              </>
-            ) : emailVerified ? (
-              <>
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Verified
-              </>
-            ) : (
-              'Verify Email'
-            )}
-          </Button>
-        </div>
-        {emailError && (
-          <p className="text-sm text-red-500">{emailError}</p>
-        )}
-        {emailVerified && (
-          <p className="text-sm text-green-600 flex items-center gap-1">
-            <CheckCircle className="w-4 h-4" />
-            Email verified and ready for registration
-          </p>
-        )}
-        <p className="text-xs text-gray-500">Click "Verify Email" to confirm your email exists before registering</p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" required minLength={6} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -375,6 +332,11 @@ export function RegisterForm() {
           <Label htmlFor="phoneNumber">Phone Number</Label>
           <Input id="phoneNumber" name="phoneNumber" placeholder="+91 9876543210" />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <Input id="password" name="password" type="password" placeholder="Enter your password" required />
       </div>
 
       <Button type="submit" className="w-full" disabled={loading || !emailVerified}>

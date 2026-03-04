@@ -91,6 +91,18 @@ export function ItemCard({ item, currentUser, onDelete }: ItemCardProps) {
       return
     }
 
+    // Get seller's hostel type to validate compatibility
+    const { data: sellerProfile } = await supabase
+      .from('profiles')
+      .select('hostel_type')
+      .eq('id', item.seller_id)
+      .single()
+
+    if (sellerProfile && sellerProfile.hostel_type !== currentUser.hostel_type) {
+      toast.error("You can only communicate with users from your hostel")
+      return
+    }
+
     setIsStartingChat(true)
     
     try {

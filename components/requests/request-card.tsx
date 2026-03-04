@@ -101,6 +101,12 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
       return;
     }
 
+    // Check hostel type compatibility
+    if (request.requester?.hostel_type && request.requester.hostel_type !== currentUser.hostel_type) {
+      toast.error("You can only communicate with users from your hostel");
+      return;
+    }
+
     setIsStartingChat(true);
 
     try {
@@ -152,6 +158,12 @@ export function RequestCard({ request, currentUser }: RequestCardProps) {
   const handleAcceptRequest = async () => {
     if (request.requester_id === currentUser.id) {
       toast.error("You can't accept your own request");
+      return;
+    }
+
+    // Check hostel type compatibility
+    if (request.requester?.hostel_type && request.requester.hostel_type !== currentUser.hostel_type) {
+      toast.error("You can only communicate with users from your hostel");
       return;
     }
 

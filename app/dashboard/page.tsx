@@ -29,7 +29,7 @@ export default function DashboardPage() {
     const loadRecentRequests = async () => {
       if (!currentUser) return;
 
-      const { data: requests, error } = await supabase
+      let query = supabase
         .from("requests")
         .select(
           `
@@ -39,11 +39,19 @@ export default function DashboardPage() {
             name,
             avatar_url,
             hostel_name,
-            room_number
+            room_number,
+            hostel_type
           )
         `,
         )
-        .eq("status", "open")
+        .eq("status", "open");
+
+      // Filter by hostel type
+      if (currentUser.hostel_type) {
+        query = query.eq("hostel_type", currentUser.hostel_type);
+      }
+
+      const { data: requests, error } = await query
         .order("created_at", { ascending: false })
         .limit(5); // Show only 5 recent requests
 
@@ -118,16 +126,23 @@ export default function DashboardPage() {
 
         if (itemsError) throw itemsError;
 
-        // Fetch requests
-        const { data: requests, error: requestsError } = await supabase
+        // Fetch requests - filter by hostel type
+        let requestsQuery = supabase
           .from("requests")
           .select(
             `
             *,
-            requester:profiles(name, room_number, hostel_name, avatar_url)
+            requester:profiles(name, room_number, hostel_name, avatar_url, hostel_type)
           `,
           )
-          .eq("status", "open")
+          .eq("status", "open");
+
+        // Apply hostel type filter for requests
+        if (profile.hostel_type) {
+          requestsQuery = requestsQuery.eq("hostel_type", profile.hostel_type);
+        }
+
+        const { data: requests, error: requestsError } = await requestsQuery
           .order("created_at", { ascending: false });
 
         if (requestsError) throw requestsError;

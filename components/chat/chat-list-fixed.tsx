@@ -53,14 +53,26 @@ export function ChatListFixed({ userId }: ChatListProps) {
       // Add cache-busting by creating a new client instance
       const freshSupabase = createClient()
       
+      // First get user's hostel type
+      const { data: profile } = await freshSupabase
+        .from('profiles')
+        .select('hostel_type')
+        .eq('id', userId)
+        .single()
+
+      if (!profile) {
+        console.error('❌ User profile not found')
+        return
+      }
+
       const { data, error } = await freshSupabase
         .from('chat_rooms')
         .select(`
           *,
           item:items(title, price),
           request:requests(title),
-          buyer:profiles!chat_rooms_buyer_id_fkey(name, avatar_url),
-          seller:profiles!chat_rooms_seller_id_fkey(name, avatar_url)
+          buyer:profiles!chat_rooms_buyer_id_fkey(name, avatar_url, hostel_type),
+          seller:profiles!chat_rooms_seller_id_fkey(name, avatar_url, hostel_type)
         `)
         .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
         .order('last_message_at', { ascending: false })
@@ -70,10 +82,16 @@ export function ChatListFixed({ userId }: ChatListProps) {
         return
       }
 
-      console.log(`📊 Loaded ${data?.length || 0} chats from database`)
-      setChats(data || [])
+      // Filter chats to only include those with same hostel type
+      const filteredChats = (data || []).filter(chat => {
+        const partner = chat.buyer_id === userId ? chat.seller : chat.buyer
+        return partner?.hostel_type === profile.hostel_type
+      })
+
+      console.log(`Loaded ${filteredChats.length} chats from database (filtered by hostel type)`)
+      setChats(filteredChats)
     } catch (error) {
-      console.error('❌ Error loading chats:', error)
+      console.error('Error loading chats:', error)
     } finally {
       setLoading(false)
     }
