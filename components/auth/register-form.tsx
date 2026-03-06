@@ -170,6 +170,28 @@ export function RegisterForm() {
       // Small delay to ensure session is established
       await new Promise(resolve => setTimeout(resolve, 500))
 
+      // 2. Create user profile with email provider
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          email: userEmail,
+          name,
+          roll_number: rollNumber,
+          hostel_type: hostelType,
+          hostel_name: hostelName,
+          room_number: roomNumber,
+          phone_number: phoneNumber,
+          auth_provider: 'email',
+          email_verified: emailVerified, // Use the verification status from email verification
+        })
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError)
+        // Don't throw error here, as the auth user was created successfully
+        // The profile will be created by the trigger if this fails
+      }
+
       // 3. If avatar was uploaded, handle it after profile creation
       let avatarUrl: string | null = null
       if (avatarFile && authData.user) {
