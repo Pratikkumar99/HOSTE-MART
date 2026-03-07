@@ -14,25 +14,9 @@ export async function GET(request: Request) {
       const { error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (!error) {
-        // Get the user after successful OAuth
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (user) {
-          // Check if user has a profile
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single()
-
-          // If no profile exists, it's a new Google user - redirect to complete profile
-          if (!profile) {
-            return NextResponse.redirect(`${origin}/google-signup`)
-          }
-        }
-        
-        // User has profile or is not Google user, redirect to dashboard
-        return NextResponse.redirect(`${origin}/dashboard`)
+        // For now, just redirect to google-signup for all Google users
+        // The page itself will handle checking if profile exists
+        return NextResponse.redirect(`${origin}/google-signup`)
       }
     } catch (error) {
       console.error('Error exchanging code for session:', error)
