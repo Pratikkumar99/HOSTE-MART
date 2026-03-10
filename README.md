@@ -35,6 +35,32 @@ Built with **Next.js**, **Supabase**, and **Tailwind CSS**, the platform replace
 
 ---
 
+### Business Features
+
+#### Business Registration & Management
+- **Business Profile Creation**: Register local businesses with detailed information
+  - Business name, description, category
+  - Contact information (phone, email)
+  - Location and service area
+  - Logo upload for brand identity
+- **Verification System**: Business verification status for trust and credibility
+- **Status Management**: Active, inactive, or suspended business status
+- **Hostel-type Targeting**: Businesses can serve specific hostel types (boys, girls, or both)
+
+#### Business Dashboard
+- **Centralized Management**: Dedicated dashboard for business owners
+- **Item Management**: Create, edit, and manage business inventory
+- **Analytics**: View business performance and customer interactions
+- **Profile Editing**: Update business information and settings
+
+#### Business Marketplace Integration
+- **Business Listings**: Items posted by businesses are clearly marked
+- **Enhanced Visibility**: Verified businesses get priority in search results
+- **Customer Trust**: Users can identify and prefer verified local businesses
+- **Direct Contact**: Easy access to business contact information
+
+---
+
 ### Notifications
 - Updates for:
   - New messages
@@ -137,6 +163,13 @@ hostel-marketplace/
 ├── app/
 │   ├── (auth)/             # Login & signup
 │   ├── dashboard/          # Protected routes
+│   ├── business/           # Business owner dashboard
+│   │   ├── dashboard/     # Business management
+│   │   ├── edit/          # Edit business profile
+│   │   ├── items/         # Business inventory management
+│   │   └── setup/         # Business registration
+│   ├── businesses/         # Public business directory
+│   │   └── [id]/         # Individual business pages
 │   ├── marketplace/        # Listings & requests
 │   ├── messages/           # Real-time chat
 │   ├── api/                # API routes
@@ -145,7 +178,8 @@ hostel-marketplace/
 │   ├── ui/                 # shadcn/ui components
 │   ├── auth/
 │   ├── items/
-│   └── requests/
+│   ├── requests/
+│   └── business/           # Business-related components
 ├── lib/
 │   ├── supabase/           # Supabase client & helpers
 │   └── utils.ts
@@ -157,7 +191,6 @@ hostel-marketplace/
 ---
 
 ## Access Control Logic
-
 * Users are tagged with hostel type at signup
 * Marketplace data is filtered at the backend level
 * **Girls hostel users cannot view boys hostel listings and vice versa**
@@ -171,6 +204,9 @@ hostel-marketplace/
 * Improves safety using hostel and gender-based segregation
 * Enables faster, local, and reliable transactions
 * Encourages reuse and sustainability within hostels
+* **Empowers local businesses** to reach hostel residents directly
+* **Creates trusted marketplace** with verified business listings
+* **Bridges gap** between students and local service providers
 
 ---
 
