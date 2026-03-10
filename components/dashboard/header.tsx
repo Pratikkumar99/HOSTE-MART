@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@/types";
 import { LogOut, Bell, Menu, X, Store, Building2 } from "lucide-react";
@@ -191,6 +192,12 @@ export function DashboardHeader({ profile }: HeaderProps) {
             >
               Change Password
             </DropdownMenuItem>
+            <DropdownMenuItem
+              asChild
+              className="cursor-pointer"
+            >
+              <Link href="https://forms.gle/dQjwgxAZWNr16kxb8" target="_blank">Give Feedback</Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive cursor-pointer"
@@ -247,6 +254,14 @@ export function DashboardHeader({ profile }: HeaderProps) {
               onClick={() => router.push("/dashboard/profile")}
             >
               Profile
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start cursor-pointer"
+            >
+              <Link href="https://forms.gle/dQjwgxAZWNr16kxb8" target="_blank">
+                Give Feedback
+              </Link>
             </Button>
             <Button
               variant="destructive"

@@ -51,7 +51,7 @@ export default async function ProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Info */}
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 h-fit">
             <CardContent className="p-6">
               <div className="flex flex-col items-center text-center">
                 <Avatar className="h-24 w-24 mb-4">
