@@ -281,10 +281,10 @@ export default function DashboardPage() {
       ) : (
         <div className="text-center py-12 rounded-lg">
           <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-gray-900 mb-2">
+          <h3 className="text-xl font-medium text-gray-900 mb-2 dark:text-white">
             No items found
           </h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          <p className="text-gray-600 mb-6 max-w-md mx-auto dark:text-gray-400">
             There are currently no items listed in your hostel. Be the first to
             list an item!
           </p>
