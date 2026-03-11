@@ -279,7 +279,7 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 rounded-lg">
           <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-medium text-gray-900 mb-2">
             No items found

@@ -252,12 +252,21 @@ export default function EditProfilePage() {
               required
             >
               <option value="">Select Hostel</option>
-              <option value="BH-1">BH-1</option>
-              <option value="BH-2">BH-2</option>
-              <option value="BH-3">BH-3</option>
-              <option value="GH-1">GH-1</option>
-              <option value="GH-2">GH-2</option>
-              <option value="GH-3">GH-3</option>
+              {profile.hostel_type === 'boys' ? (
+                <>
+                  <option value="BH-1">BH-1</option>
+                  <option value="BH-2">BH-2</option>
+                  <option value="BH-3">BH-3</option>
+                  <option value="BH-4">BH-4</option>
+                </>
+              ) : (
+                <>
+                  <option value="GH-1">GH-1</option>
+                  <option value="GH-2">GH-2</option>
+                  <option value="GH-3">GH-3</option>
+                  <option value="GH-4">GH-4</option>
+                </>
+              )}
             </select>
           </div>
 
