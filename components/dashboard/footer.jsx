@@ -552,17 +552,7 @@ export function Footer() {
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <span>Made with</span>
-                  <motion.span
-                    className="text-green-400 inline-block"
-                    animate={{
-                      scale: [1, 1.3, 1],
-                    }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <Heart className="h-4 w-4 fill-current" />
-                  </motion.span>
-                  <span>for</span>
+                  <span>Designed and Developed at </span>
                   <motion.span
                     className="font-semibold text-white relative group cursor-pointer"
                     whileHover={{ scale: 1.05 }}
