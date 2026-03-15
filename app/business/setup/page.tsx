@@ -266,9 +266,6 @@ export default function BusinessSetupPage() {
                     <div className="px-3 py-2 bg-gray-100 rounded-md text-sm font-medium dark:bg-black dark:text-white w-fit">
                       {profile?.hostel_name}, Room {profile?.room_number}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Your business location is automatically set from your profile
-                    </p>
                   </div>
 
                   <div className="space-y-2">
